@@ -2,9 +2,10 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-09 23:56:14
+ * @Last Modified time: 2020-04-10 09:52:12
  */
 const _ = require('lodash');
+const inflect = require('i')();
 
 const findTypeTxt = columnRow => {
   switch (columnRow.DATA_TYPE) {
@@ -91,7 +92,7 @@ const findProperty = (typeString, enumTypeName, sequelizeType, columnRow) => {
   /**
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */
-  @Field({ description: '${columnRow.COLUMN_COMMENT}' }${columnRow.DATA_TYPE === 'json' ? ', ()=> GraphQLJSON' : ''})
+  @Field(${columnRow.DATA_TYPE === 'json' ? '()=> GraphQLJSON, ' : ''}{ description: '${columnRow.COLUMN_COMMENT}' })
   @Column({ comment: '${columnRow.COLUMN_COMMENT}', type: DataType.${sequelizeType} })
   ${_.camelCase(columnRow.COLUMN_NAME)}?: ${enumTypeName || typeString};
 `;
@@ -112,11 +113,11 @@ import GraphQLJSON from 'graphql-type-json';
 @Table({
   tableName: '${tableItem.name}',
 })
-export class ${_.camelCase(tableItem.name)}Model extends ModelBase {
+export class ${inflect.camelize(tableItem.name)}Model extends ModelBase {
 ${propertyTxt}
 }
 
-// 常量生成
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 export class ${_.toUpper(tableItem.name)} {
 ${constTxt}
 }

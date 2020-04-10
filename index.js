@@ -3,7 +3,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-09 23:50:04
+ * @Last Modified time: 2020-04-10 09:51:17
  */
 
 const inquirer = require("inquirer");
@@ -96,7 +96,7 @@ const askListQuestions = (list, key, type = 'list', message = key) => {
  */
 const createFile = async (filename, txt) => {
   return new Promise((resolve, reject) => {
-    fs.writeFile(`./out/${filename}.ts`, txt, error => {
+    fs.writeFile(`./out/${filename}.model.ts`, txt, error => {
       error ? reject(error) : resolve()
     });
   })
@@ -169,7 +169,7 @@ const run = async () => {
   const result = await askListQuestions(nameList, 'tableName', 'checkbox');
   result.tableName.forEach(async p => {
     const modelTemp = await findModel(mysqlHelper, p);
-    const filename = _.replace(p.name, '_', '-');
+    const filename = p.name.replace(/_/g, '-');
     createFile(filename, modelTemp).then(() => {
       success(filename);
     }).catch(error => {

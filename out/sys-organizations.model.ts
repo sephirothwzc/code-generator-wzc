@@ -1,16 +1,18 @@
 
 import { Table, Column, DataType } from 'sequelize-typescript';
 import { ModelBase } from 'libs/base/src/model.base';
+import { ArgsType, ObjectType, Field } from '@nestjs/graphql';
+import GraphQLJSON from 'graphql-type-json';
 
 // #region enum
 // #endregion
 
 @ArgsType()
-@ObjectType({description:'组织机构角色对应用户表'})
+@ObjectType({description:'组织机构表'})
 @Table({
-  tableName: 'relation_organization_role_user',
+  tableName: 'sys_organizations',
 })
-export class relationOrganizationRoleUserModel extends ModelBase {
+export class SysOrganizationsModel extends ModelBase {
 
   /**
    * 编码
@@ -43,7 +45,7 @@ export class relationOrganizationRoleUserModel extends ModelBase {
   /**
    * i18n
    */
-  @Field({ description: 'i18n' }, ()=> GraphQLJSON)
+  @Field(()=> GraphQLJSON, { description: 'i18n' })
   @Column({ comment: 'i18n', type: DataType.JSON })
   i18N?: Record<string, any>;
 
@@ -55,11 +57,18 @@ export class relationOrganizationRoleUserModel extends ModelBase {
   id?: string;
 
   /**
-   * 组织机构角色id
+   * 部门名称 default-i18n
    */
-  @Field({ description: '组织机构角色id' })
-  @Column({ comment: '组织机构角色id', type: DataType.STRING(50) })
-  organizationRoleId?: string;
+  @Field({ description: '部门名称 default-i18n' })
+  @Column({ comment: '部门名称 default-i18n', type: DataType.STRING(50) })
+  organizationName?: string;
+
+  /**
+   * 上级部门id
+   */
+  @Field({ description: '上级部门id' })
+  @Column({ comment: '上级部门id', type: DataType.STRING(50) })
+  parentId?: string;
 
   /**
    * 备注
@@ -82,17 +91,10 @@ export class relationOrganizationRoleUserModel extends ModelBase {
   @Column({ comment: '修改人id', type: DataType.STRING(50) })
   updatedUser?: string;
 
-  /**
-   * 用户id
-   */
-  @Field({ description: '用户id' })
-  @Column({ comment: '用户id', type: DataType.STRING(50) })
-  userId?: string;
-
 }
 
-// 常量生成
-export class RELATION_ORGANIZATION_ROLE_USER {
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+export class SYS_ORGANIZATIONS {
 
   /**
    * 编码
@@ -125,9 +127,14 @@ export class RELATION_ORGANIZATION_ROLE_USER {
   static readonly ID: string = 'id';
 
   /**
-   * 组织机构角色id
+   * 部门名称 default-i18n
    */
-  static readonly ORGANIZATION_ROLE_ID: string = 'organizationRoleId';
+  static readonly ORGANIZATION_NAME: string = 'organizationName';
+
+  /**
+   * 上级部门id
+   */
+  static readonly PARENT_ID: string = 'parentId';
 
   /**
    * 备注
@@ -143,10 +150,5 @@ export class RELATION_ORGANIZATION_ROLE_USER {
    * 修改人id
    */
   static readonly UPDATED_USER: string = 'updatedUser';
-
-  /**
-   * 用户id
-   */
-  static readonly USER_ID: string = 'userId';
 
 }

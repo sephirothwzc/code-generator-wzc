@@ -1,6 +1,8 @@
 
 import { Table, Column, DataType } from 'sequelize-typescript';
 import { ModelBase } from 'libs/base/src/model.base';
+import { ArgsType, ObjectType, Field } from '@nestjs/graphql';
+import GraphQLJSON from 'graphql-type-json';
 
 // #region enum
 // #endregion
@@ -10,7 +12,7 @@ import { ModelBase } from 'libs/base/src/model.base';
 @Table({
   tableName: 'relation_organization_role',
 })
-export class relationOrganizationRoleModel extends ModelBase {
+export class RelationOrganizationRoleModel extends ModelBase {
 
   /**
    * 编码
@@ -43,7 +45,7 @@ export class relationOrganizationRoleModel extends ModelBase {
   /**
    * i18n
    */
-  @Field({ description: 'i18n' }, ()=> GraphQLJSON)
+  @Field(()=> GraphQLJSON, { description: 'i18n' })
   @Column({ comment: 'i18n', type: DataType.JSON })
   i18N?: Record<string, any>;
 
@@ -91,7 +93,7 @@ export class relationOrganizationRoleModel extends ModelBase {
 
 }
 
-// 常量生成
+// eslint-disable-next-line @typescript-eslint/class-name-casing
 export class RELATION_ORGANIZATION_ROLE {
 
   /**

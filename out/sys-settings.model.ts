@@ -1,16 +1,42 @@
 
 import { Table, Column, DataType } from 'sequelize-typescript';
 import { ModelBase } from 'libs/base/src/model.base';
+import { ArgsType, ObjectType, Field } from '@nestjs/graphql';
+import GraphQLJSON from 'graphql-type-json';
 
 // #region enum
+  export enum Etype {
+
+  /**
+   * 是否类型
+   */
+  boolType= 0
+  ,
+  /**
+   * 文本类型
+   */
+  stringType= 1
+  ,
+  /**
+   * 数字类型
+   */
+  numberType= 2
+  ,
+  /**
+   * 下拉选择
+   */
+  selectType= 3
+  
+    }
+
 // #endregion
 
 @ArgsType()
-@ObjectType({description:'角色表'})
+@ObjectType({description:'系统设置表'})
 @Table({
-  tableName: 'sys_roles',
+  tableName: 'sys_settings',
 })
-export class sysRolesModel extends ModelBase {
+export class SysSettingsModel extends ModelBase {
 
   /**
    * 编码
@@ -43,7 +69,7 @@ export class sysRolesModel extends ModelBase {
   /**
    * i18n
    */
-  @Field({ description: 'i18n' }, ()=> GraphQLJSON)
+  @Field(()=> GraphQLJSON, { description: 'i18n' })
   @Column({ comment: 'i18n', type: DataType.JSON })
   i18N?: Record<string, any>;
 
@@ -55,11 +81,11 @@ export class sysRolesModel extends ModelBase {
   id?: string;
 
   /**
-   * 上级id
+   * 设置键
    */
-  @Field({ description: '上级id' })
-  @Column({ comment: '上级id', type: DataType.STRING(50) })
-  parentId?: string;
+  @Field({ description: '设置键' })
+  @Column({ comment: '设置键', type: DataType.STRING(50) })
+  key?: string;
 
   /**
    * 备注
@@ -69,11 +95,11 @@ export class sysRolesModel extends ModelBase {
   remark?: string;
 
   /**
-   * 角色名称
+   * 设置类型[boolType 0 是否类型,stringType 1 文本类型,numberType 2 数字类型,selectType 3 下拉选择]
    */
-  @Field({ description: '角色名称' })
-  @Column({ comment: '角色名称', type: DataType.STRING(50) })
-  roleName?: string;
+  @Field({ description: '设置类型[boolType 0 是否类型,stringType 1 文本类型,numberType 2 数字类型,selectType 3 下拉选择]' })
+  @Column({ comment: '设置类型[boolType 0 是否类型,stringType 1 文本类型,numberType 2 数字类型,selectType 3 下拉选择]', type: DataType.STRING(50) })
+  type?: type;
 
   /**
    * updated_at
@@ -89,10 +115,17 @@ export class sysRolesModel extends ModelBase {
   @Column({ comment: '修改人id', type: DataType.STRING(50) })
   updatedUser?: string;
 
+  /**
+   * 设置值
+   */
+  @Field({ description: '设置值' })
+  @Column({ comment: '设置值', type: DataType.STRING(2000) })
+  value?: string;
+
 }
 
-// 常量生成
-export class SYS_ROLES {
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+export class SYS_SETTINGS {
 
   /**
    * 编码
@@ -125,9 +158,9 @@ export class SYS_ROLES {
   static readonly ID: string = 'id';
 
   /**
-   * 上级id
+   * 设置键
    */
-  static readonly PARENT_ID: string = 'parentId';
+  static readonly KEY: string = 'key';
 
   /**
    * 备注
@@ -135,9 +168,9 @@ export class SYS_ROLES {
   static readonly REMARK: string = 'remark';
 
   /**
-   * 角色名称
+   * 设置类型[boolType 0 是否类型,stringType 1 文本类型,numberType 2 数字类型,selectType 3 下拉选择]
    */
-  static readonly ROLE_NAME: string = 'roleName';
+  static readonly TYPE: string = 'type';
 
   /**
    * 
@@ -148,5 +181,10 @@ export class SYS_ROLES {
    * 修改人id
    */
   static readonly UPDATED_USER: string = 'updatedUser';
+
+  /**
+   * 设置值
+   */
+  static readonly VALUE: string = 'value';
 
 }

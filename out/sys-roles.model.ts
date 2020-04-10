@@ -1,16 +1,18 @@
 
 import { Table, Column, DataType } from 'sequelize-typescript';
 import { ModelBase } from 'libs/base/src/model.base';
+import { ArgsType, ObjectType, Field } from '@nestjs/graphql';
+import GraphQLJSON from 'graphql-type-json';
 
 // #region enum
 // #endregion
 
 @ArgsType()
-@ObjectType({description:'组织机构表'})
+@ObjectType({description:'角色表'})
 @Table({
-  tableName: 'sys_organizations',
+  tableName: 'sys_roles',
 })
-export class sysOrganizationsModel extends ModelBase {
+export class SysRolesModel extends ModelBase {
 
   /**
    * 编码
@@ -43,7 +45,7 @@ export class sysOrganizationsModel extends ModelBase {
   /**
    * i18n
    */
-  @Field({ description: 'i18n' }, ()=> GraphQLJSON)
+  @Field(()=> GraphQLJSON, { description: 'i18n' })
   @Column({ comment: 'i18n', type: DataType.JSON })
   i18N?: Record<string, any>;
 
@@ -55,17 +57,10 @@ export class sysOrganizationsModel extends ModelBase {
   id?: string;
 
   /**
-   * 部门名称 default-i18n
+   * 上级id
    */
-  @Field({ description: '部门名称 default-i18n' })
-  @Column({ comment: '部门名称 default-i18n', type: DataType.STRING(50) })
-  organizationName?: string;
-
-  /**
-   * 上级部门id
-   */
-  @Field({ description: '上级部门id' })
-  @Column({ comment: '上级部门id', type: DataType.STRING(50) })
+  @Field({ description: '上级id' })
+  @Column({ comment: '上级id', type: DataType.STRING(50) })
   parentId?: string;
 
   /**
@@ -74,6 +69,13 @@ export class sysOrganizationsModel extends ModelBase {
   @Field({ description: '备注' })
   @Column({ comment: '备注', type: DataType.STRING(50) })
   remark?: string;
+
+  /**
+   * 角色名称
+   */
+  @Field({ description: '角色名称' })
+  @Column({ comment: '角色名称', type: DataType.STRING(50) })
+  roleName?: string;
 
   /**
    * updated_at
@@ -91,8 +93,8 @@ export class sysOrganizationsModel extends ModelBase {
 
 }
 
-// 常量生成
-export class SYS_ORGANIZATIONS {
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+export class SYS_ROLES {
 
   /**
    * 编码
@@ -125,12 +127,7 @@ export class SYS_ORGANIZATIONS {
   static readonly ID: string = 'id';
 
   /**
-   * 部门名称 default-i18n
-   */
-  static readonly ORGANIZATION_NAME: string = 'organizationName';
-
-  /**
-   * 上级部门id
+   * 上级id
    */
   static readonly PARENT_ID: string = 'parentId';
 
@@ -138,6 +135,11 @@ export class SYS_ORGANIZATIONS {
    * 备注
    */
   static readonly REMARK: string = 'remark';
+
+  /**
+   * 角色名称
+   */
+  static readonly ROLE_NAME: string = 'roleName';
 
   /**
    * 

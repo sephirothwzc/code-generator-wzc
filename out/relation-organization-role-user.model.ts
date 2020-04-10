@@ -1,23 +1,18 @@
 
 import { Table, Column, DataType } from 'sequelize-typescript';
 import { ModelBase } from 'libs/base/src/model.base';
+import { ArgsType, ObjectType, Field } from '@nestjs/graphql';
+import GraphQLJSON from 'graphql-type-json';
 
 // #region enum
 // #endregion
 
 @ArgsType()
-@ObjectType({description:'系统用户'})
+@ObjectType({description:'组织机构角色对应用户表'})
 @Table({
-  tableName: 'sys_users',
+  tableName: 'relation_organization_role_user',
 })
-export class sysUsersModel extends ModelBase {
-
-  /**
-   * 头像
-   */
-  @Field({ description: '头像' })
-  @Column({ comment: '头像', type: DataType.STRING(200) })
-  avatarUrl?: string;
+export class RelationOrganizationRoleUserModel extends ModelBase {
 
   /**
    * 编码
@@ -48,16 +43,9 @@ export class sysUsersModel extends ModelBase {
   deletedAt?: Date;
 
   /**
-   * 邮箱
-   */
-  @Field({ description: '邮箱' })
-  @Column({ comment: '邮箱', type: DataType.STRING(50) })
-  email?: string;
-
-  /**
    * i18n
    */
-  @Field({ description: 'i18n' }, ()=> GraphQLJSON)
+  @Field(()=> GraphQLJSON, { description: 'i18n' })
   @Column({ comment: 'i18n', type: DataType.JSON })
   i18N?: Record<string, any>;
 
@@ -69,32 +57,11 @@ export class sysUsersModel extends ModelBase {
   id?: string;
 
   /**
-   * 最后更新token时间
+   * 组织机构角色id
    */
-  @Field({ description: '最后更新token时间' })
-  @Column({ comment: '最后更新token时间', type: DataType.DATE })
-  lastAt?: Date;
-
-  /**
-   * 昵称
-   */
-  @Field({ description: '昵称' })
-  @Column({ comment: '昵称', type: DataType.STRING(50) })
-  nickName?: string;
-
-  /**
-   * 密码
-   */
-  @Field({ description: '密码' })
-  @Column({ comment: '密码', type: DataType.STRING(200) })
-  password?: string;
-
-  /**
-   * 手机号
-   */
-  @Field({ description: '手机号' })
-  @Column({ comment: '手机号', type: DataType.STRING(20) })
-  phone?: string;
+  @Field({ description: '组织机构角色id' })
+  @Column({ comment: '组织机构角色id', type: DataType.STRING(50) })
+  organizationRoleId?: string;
 
   /**
    * 备注
@@ -102,13 +69,6 @@ export class sysUsersModel extends ModelBase {
   @Field({ description: '备注' })
   @Column({ comment: '备注', type: DataType.STRING(50) })
   remark?: string;
-
-  /**
-   * 最后登录的token
-   */
-  @Field({ description: '最后登录的token' })
-  @Column({ comment: '最后登录的token', type: DataType.STRING(50) })
-  token?: string;
 
   /**
    * updated_at
@@ -125,21 +85,16 @@ export class sysUsersModel extends ModelBase {
   updatedUser?: string;
 
   /**
-   * 用户名登陆用
+   * 用户id
    */
-  @Field({ description: '用户名登陆用' })
-  @Column({ comment: '用户名登陆用', type: DataType.STRING(50) })
-  userName?: string;
+  @Field({ description: '用户id' })
+  @Column({ comment: '用户id', type: DataType.STRING(50) })
+  userId?: string;
 
 }
 
-// 常量生成
-export class SYS_USERS {
-
-  /**
-   * 头像
-   */
-  static readonly AVATAR_URL: string = 'avatarUrl';
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+export class RELATION_ORGANIZATION_ROLE_USER {
 
   /**
    * 编码
@@ -162,11 +117,6 @@ export class SYS_USERS {
   static readonly DELETED_AT: string = 'deletedAt';
 
   /**
-   * 邮箱
-   */
-  static readonly EMAIL: string = 'email';
-
-  /**
    * i18n
    */
   static readonly I18N: string = 'i18N';
@@ -177,34 +127,14 @@ export class SYS_USERS {
   static readonly ID: string = 'id';
 
   /**
-   * 最后更新token时间
+   * 组织机构角色id
    */
-  static readonly LAST_AT: string = 'lastAt';
-
-  /**
-   * 昵称
-   */
-  static readonly NICK_NAME: string = 'nickName';
-
-  /**
-   * 密码
-   */
-  static readonly PASSWORD: string = 'password';
-
-  /**
-   * 手机号
-   */
-  static readonly PHONE: string = 'phone';
+  static readonly ORGANIZATION_ROLE_ID: string = 'organizationRoleId';
 
   /**
    * 备注
    */
   static readonly REMARK: string = 'remark';
-
-  /**
-   * 最后登录的token
-   */
-  static readonly TOKEN: string = 'token';
 
   /**
    * 
@@ -217,8 +147,8 @@ export class SYS_USERS {
   static readonly UPDATED_USER: string = 'updatedUser';
 
   /**
-   * 用户名登陆用
+   * 用户id
    */
-  static readonly USER_NAME: string = 'userName';
+  static readonly USER_ID: string = 'userId';
 
 }
