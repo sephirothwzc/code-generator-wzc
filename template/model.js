@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-10 09:52:12
+ * @Last Modified time: 2020-04-10 16:03:50
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -82,7 +82,7 @@ ${ee}
     }
 `;
   return {
-    enumTypeName,
+    enumTypeName: `E${enumTypeName}`,
     txt
   }
 }
