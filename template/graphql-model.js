@@ -2,10 +2,17 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-10 16:03:50
+ * @Last Modified time: 2020-04-11 23:28:02
  */
 const _ = require('lodash');
 const inflect = require('i')();
+
+const notColumn = [
+  'id',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+];
 
 const findTypeTxt = columnRow => {
   switch (columnRow.DATA_TYPE) {
@@ -66,8 +73,7 @@ const findEnum = columnRow => {
     .map(p => {
       const rd3 = p.split(' ');
       const val = rd3[1] ? `= ${rd3[1]}` : '';
-      return `
-  /**
+      return `  /**
    * ${rd3[2]}
    */
   ${rd3[0]}${val}
@@ -77,39 +83,50 @@ const findEnum = columnRow => {
     .toString();
   const enumTypeName = _.camelCase(columnRow.COLUMN_NAME);
   const txt = `
-  export enum E${enumTypeName} {
+export enum E${enumTypeName} {
 ${ee}
-    }
+}
 `;
+  const registerEnumType = `registerEnumType(E${enumTypeName}, {
+  name: 'E${enumTypeName}',
+});
+  `;
   return {
     enumTypeName: `E${enumTypeName}`,
-    txt
+    txt,
+    registerEnumType
   }
 }
 
+/**
+ * field 不设置null
+ * @param {*} typeString 
+ * @param {*} enumTypeName 
+ * @param {*} sequelizeType 
+ * @param {*} columnRow 
+ */
 const findProperty = (typeString, enumTypeName, sequelizeType, columnRow) => {
-  return `
-  /**
+  // @Field({ description: '编码', nullable: true })
+  return `  /**
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */
   @Field(${columnRow.DATA_TYPE === 'json' ? '()=> GraphQLJSON, ' : ''}{ description: '${columnRow.COLUMN_COMMENT}' })
   @Column({ comment: '${columnRow.COLUMN_COMMENT}', type: DataType.${sequelizeType} })
-  ${_.camelCase(columnRow.COLUMN_NAME)}?: ${enumTypeName || typeString};
+  ${inflect.camelize(columnRow.COLUMN_NAME, false)}?: ${enumTypeName || typeString};
 `;
 }
 
-const modelTemplate = (propertyTxt, enumTxt, constTxt, tableItem) => {
-  return `
-import { Table, Column, DataType } from 'sequelize-typescript';
+const modelTemplate = (propertyTxt, enumTxt, registerEnumType, constTxt, tableItem) => {
+  return `import { Table, Column, DataType } from 'sequelize-typescript';
 import { ModelBase } from 'libs/base/src/model.base';
-import { ArgsType, ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
 
 // #region enum${enumTxt}
+${registerEnumType}
 // #endregion
 
-@ArgsType()
-@ObjectType({description:'${tableItem.comment}'})
+@ObjectType({ description: '${tableItem.comment}' })
 @Table({
   tableName: '${tableItem.name}',
 })
@@ -130,13 +147,13 @@ ${constTxt}
  * @param {*} mysqlHelper 
  * @param {*} tableItem 
  */
-const findModel = async (mysqlHelper, tableItem) => {
-  const columnList = await mysqlHelper.queryColumn(tableItem.name);
-  let enumTxt = '', propertyTxt = '', constTxt = '';
-  columnList.forEach(p => {
+const findmodel = async (columnList, tableItem) => {
+  let enumTxt = '', propertyTxt = '', constTxt = '', registerEnumType = '';
+  columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
     const typeString = findTypeTxt(p);
     const colEnum = findEnum(p);
     enumTxt += _.get(colEnum, 'txt', '');
+    registerEnumType += _.get(colEnum, 'registerEnumType', '');
     const sequelizeType = findSequelizeType(p);
     propertyTxt += findProperty(typeString, _.get(colEnum, 'enumTypeName'), sequelizeType, p);
     constTxt += `
@@ -146,7 +163,7 @@ const findModel = async (mysqlHelper, tableItem) => {
   static readonly ${_.toUpper(p.COLUMN_NAME)}: string = '${_.camelCase(p.COLUMN_NAME)}';
 `
   });
-  return modelTemplate(propertyTxt, enumTxt, constTxt, tableItem);
+  return modelTemplate(propertyTxt, enumTxt, registerEnumType, constTxt, tableItem);
 }
 
-module.exports = findModel;
+module.exports = findmodel;

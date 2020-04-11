@@ -3,18 +3,28 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-10 09:51:17
+ * @Last Modified time: 2020-04-11 12:33:10
  */
 
 const inquirer = require("inquirer");
 const chalk = require("chalk");
 const figlet = require("figlet");
 const shell = require("shelljs");
-const _ = require('lodash');
+// const _ = require('lodash');
 const MysqlHelper = require('./utils/mysql-helper');
-const findModel = require('./template/model');
+// eslint-disable-next-line no-unused-vars
+const findmodel = require('./template/graphql-model');
+// eslint-disable-next-line no-unused-vars
+const findinput = require('./template/graphql-input');
+// eslint-disable-next-line no-unused-vars
+const findargs = require('./template/graphql-args');
 const fs = require('fs');
 
+const modelFunction = {
+  findmodel,
+  findinput,
+  findargs
+}
 
 /**
  * 初始化
@@ -94,9 +104,10 @@ const askListQuestions = (list, key, type = 'list', message = key) => {
  * 创建文件
  * @param {string} filename 文件名
  */
-const createFile = async (filename, txt) => {
+const createFile = async (filename, txt, type) => {
+  shell.mkdir('-p', `./out/${type}`);
   return new Promise((resolve, reject) => {
-    fs.writeFile(`./out/${filename}.model.ts`, txt, error => {
+    fs.writeFile(`./out/${type}/${filename}.${type}.ts`, txt, error => {
       error ? reject(error) : resolve()
     });
   })
@@ -165,17 +176,25 @@ const run = async () => {
     }
   });
   // 选择导出表格
-
   const result = await askListQuestions(nameList, 'tableName', 'checkbox');
+  // 选择导出对象
+  const type = await askListQuestions(['model', 'args', 'input'], 'fileType', 'checkbox');
+  // // 输出目录 再说吧
+  // const dirpath = await 
   result.tableName.forEach(async p => {
-    const modelTemp = await findModel(mysqlHelper, p);
-    const filename = p.name.replace(/_/g, '-');
-    createFile(filename, modelTemp).then(() => {
-      success(filename);
-    }).catch(error => {
-      console.error(
-        chalk.white.bgRed.bold(`Error: `) + `\t [${filename}]${error}!`
-      );
+    const columnList = await mysqlHelper.queryColumn(p.name);
+    // 获取文件模版
+    type.fileType.forEach(async t => {
+      const funcName = `find${t}`;
+      const tempTxt = await modelFunction[funcName](columnList, p);
+      const filename = p.name.replace(/_/g, '-');
+      createFile(filename, tempTxt, t).then(() => {
+        success(filename);
+      }).catch(error => {
+        console.error(
+          chalk.white.bgRed.bold(`Error: `) + `\t [${filename}]${error}!`
+        );
+      });
     });
   });
 };
