@@ -2,17 +2,17 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-11 22:57:29
+ * @Last Modified time: 2020-04-19 16:24:25
  */
 const _ = require('lodash');
 const inflect = require('i')();
 
-const notColumn = [
-  'id',
-  'created_at',
-  'updated_at',
-  'deleted_at',
-];
+// const notColumn = [
+//   'id',
+//   'created_at',
+//   'updated_at',
+//   'deleted_at',
+// ];
 
 const gqlTypeMapper = {
   GraphQLJSON: {
@@ -79,11 +79,12 @@ const findEnum = columnRow => {
 }
 
 const findProperty = (typeString, enumTypeName, gqlType, columnRow) => {
+  const nullable = columnRow.IS_NULLABLE === 'YES' ? ', nullable: true ' : '';
   const gqlTypeTxt = enumTypeName ? `()=> ${enumTypeName}, ` : _.get(gqlTypeMapper, `${gqlType}.txt`, '');
   return `  /**
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */
-  @Field(${gqlTypeTxt}{ description: '${columnRow.COLUMN_COMMENT}' })
+  @Field(${gqlTypeTxt}{ description: '${columnRow.COLUMN_COMMENT}'${nullable} })
   ${inflect.camelize(columnRow.COLUMN_NAME, false)}?: ${enumTypeName || typeString};
 `;
 }
@@ -107,7 +108,8 @@ ${propertyTxt}
  */
 const findinput = async (columnList, tableItem) => {
   let enumTxt = '', propertyTxt = '', constTxt = '';
-  columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
+  // columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
+  columnList.forEach(p => {
     const typeString = findTypeTxt(p);
     const colEnum = findEnum(p);
     const gqlType = findGqlType(p);

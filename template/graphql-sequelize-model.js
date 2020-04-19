@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-19 16:25:52
+ * @Last Modified time: 2020-04-19 11:41:10
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -106,18 +106,20 @@ ${ee}
  * @param {*} columnRow 
  */
 const findProperty = (typeString, enumTypeName, sequelizeType, columnRow) => {
-  const nullable = columnRow.IS_NULLABLE === 'YES' ? ', nullable: true ' : '';
   // @Field({ description: '编码', nullable: true })
   return `  /**
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */
-  @Field(${columnRow.DATA_TYPE === 'json' ? '()=> GraphQLJSON, ' : ''}{ description: '${columnRow.COLUMN_COMMENT}'${nullable} })
+  @Field(${columnRow.DATA_TYPE === 'json' ? '()=> GraphQLJSON, ' : ''}{ description: '${columnRow.COLUMN_COMMENT}' })
+  @Column({ comment: '${columnRow.COLUMN_COMMENT}', type: DataType.${sequelizeType} })
   ${inflect.camelize(columnRow.COLUMN_NAME, false)}?: ${enumTypeName || typeString};
 `;
 }
 
 const modelTemplate = (propertyTxt, enumTxt, registerEnumType, constTxt, tableItem) => {
-  return `import { ObjectType, Field } from '@nestjs/graphql';
+  return `import { Table, Column, DataType } from 'sequelize-typescript';
+import { ModelBase } from 'libs/base/src/model.base';
+import { ObjectType, Field } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
 
 // #region enum${enumTxt}
@@ -125,7 +127,10 @@ ${registerEnumType}
 // #endregion
 
 @ObjectType({ description: '${tableItem.comment}' })
-export class ${inflect.camelize(tableItem.name)}Model {
+@Table({
+  tableName: '${tableItem.name}',
+})
+export class ${inflect.camelize(tableItem.name)}Model extends ModelBase {
 ${propertyTxt}
 }
 
