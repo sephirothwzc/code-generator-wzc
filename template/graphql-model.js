@@ -2,17 +2,21 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-19 16:25:52
+ * @Last Modified time: 2020-04-19 23:06:48
  */
 const _ = require('lodash');
 const inflect = require('i')();
 
-// const notColumn = [
-//   'id',
-//   'created_at',
-//   'updated_at',
-//   'deleted_at',
-// ];
+const notColumn = [
+  'id',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+  'created_user',
+  'updated_user',
+  'code',
+  'i18n'
+];
 
 const findTypeTxt = columnRow => {
   switch (columnRow.DATA_TYPE) {
@@ -118,7 +122,8 @@ const findProperty = (typeString, enumTypeName, sequelizeType, columnRow) => {
 
 const modelTemplate = (propertyTxt, enumTxt, registerEnumType, constTxt, tableItem) => {
   return `import { ObjectType, Field } from '@nestjs/graphql';
-import GraphQLJSON from 'graphql-type-json';
+import { BaseModel } from 'src/base/base.model';
+// import GraphQLJSON from 'graphql-type-json';
 
 // #region enum${enumTxt}
 ${registerEnumType}
@@ -130,7 +135,7 @@ ${propertyTxt}
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-export class ${_.toUpper(tableItem.name)} {
+export class ${_.toUpper(tableItem.name)} extends BaseModel {
 ${constTxt}
 }
 `;
@@ -144,8 +149,8 @@ ${constTxt}
  */
 const findmodel = async (columnList, tableItem) => {
   let enumTxt = '', propertyTxt = '', constTxt = '', registerEnumType = '';
-  // columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
-  columnList.forEach(p => {
+  columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
+    // columnList.forEach(p => {
     const typeString = findTypeTxt(p);
     const colEnum = findEnum(p);
     enumTxt += _.get(colEnum, 'txt', '');

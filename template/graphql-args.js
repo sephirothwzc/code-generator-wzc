@@ -2,17 +2,21 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-19 16:24:00
+ * @Last Modified time: 2020-04-19 23:11:35
  */
 const _ = require('lodash');
 const inflect = require('i')();
 
-// const notColumn = [
-//   'id',
-//   'created_at',
-//   'updated_at',
-//   'deleted_at',
-// ];
+const notColumn = [
+  'id',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+  'created_user',
+  'updated_user',
+  'code',
+  'i18n'
+];
 
 const gqlTypeMapper = {
   GraphQLJSON: {
@@ -90,10 +94,11 @@ const findProperty = (typeString, enumTypeName, gqlType, columnRow) => {
 
 const modelTemplate = (propertyTxt, enumTxt, constTxt, tableItem) => {
   return `import { ArgsType, Field } from '@nestjs/graphql';
-import GraphQLJSON from 'graphql-type-json';
+import { BaseArgs } from 'src/base/base.args';
+// import GraphQLJSON from 'graphql-type-json';
 
 @ArgsType()
-export class ${inflect.camelize(tableItem.name)}Args {
+export class ${inflect.camelize(tableItem.name)}Args extends BaseArgs {
 ${propertyTxt}
 }
 `;
@@ -107,8 +112,8 @@ ${propertyTxt}
  */
 const findargs = async (columnList, tableItem) => {
   let enumTxt = '', propertyTxt = '', constTxt = '';
-  // columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
-  columnList.forEach(p => {
+  columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
+    // columnList.forEach(p => {
     const typeString = findTypeTxt(p);
     const colEnum = findEnum(p);
     const gqlType = findGqlType(p);
