@@ -2,8 +2,8 @@
 /*
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
- * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-11 12:33:10
+ * @Last Modified by: 王肇峰
+ * @Last Modified time: 2020-04-20 16:20:04
  */
 
 const inquirer = require("inquirer");
@@ -13,7 +13,7 @@ const shell = require("shelljs");
 // const _ = require('lodash');
 const MysqlHelper = require('./utils/mysql-helper');
 // eslint-disable-next-line no-unused-vars
-const findmodel = require('./template/graphql-model');
+const findmodel = require('./template/sequelize-model');
 // eslint-disable-next-line no-unused-vars
 const findinput = require('./template/graphql-input');
 // eslint-disable-next-line no-unused-vars
@@ -88,6 +88,14 @@ const askQuestions = () => {
   return inquirer.prompt(questions);
 };
 
+/**
+ * 控制台输出列表选择格式问答
+ * 
+ * @param {*} list 选项列表
+ * @param {*} key 选项名称
+ * @param {*} type 选项格式
+ * @param {*} message 选项描述
+ */
 const askListQuestions = (list, key, type = 'list', message = key) => {
   const questions = [
     {
@@ -168,7 +176,7 @@ const run = async () => {
   // find table
   const mysqlHelper = new MysqlHelper(answers);
   const tableList = await mysqlHelper.queryTable();
-
+  // 构建表名称的数组
   const nameList = tableList.map(p => {
     return {
       name: `${p.name}--${p.comment}`,
@@ -179,7 +187,7 @@ const run = async () => {
   const result = await askListQuestions(nameList, 'tableName', 'checkbox');
   // 选择导出对象
   const type = await askListQuestions(['model', 'args', 'input'], 'fileType', 'checkbox');
-  // // 输出目录 再说吧
+  // TODO 输出目录 再说吧
   // const dirpath = await 
   result.tableName.forEach(async p => {
     const columnList = await mysqlHelper.queryColumn(p.name);
