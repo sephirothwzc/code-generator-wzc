@@ -2,17 +2,24 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-19 11:41:10
+ * @Last Modified time: 2020-04-28 10:05:25
  */
 const _ = require('lodash');
 const inflect = require('i')();
+// 是否添加引用
+let importHasMany = false;
+let importBelongsTo = false;
 
-// const notColumn = [
-//   'id',
-//   'created_at',
-//   'updated_at',
-//   'deleted_at',
-// ];
+const notColumn = [
+  'id',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+  'created_user',
+  'updated_user',
+  'code',
+  'i18n'
+];
 
 const findTypeTxt = columnRow => {
   switch (columnRow.DATA_TYPE) {
@@ -106,21 +113,56 @@ ${ee}
  * @param {*} columnRow 
  */
 const findProperty = (typeString, enumTypeName, sequelizeType, columnRow) => {
+  const nullable = columnRow.IS_NULLABLE === 'YES' ? ', nullable: true ' : '';
   // @Field({ description: '编码', nullable: true })
   return `  /**
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */
-  @Field(${columnRow.DATA_TYPE === 'json' ? '()=> GraphQLJSON, ' : ''}{ description: '${columnRow.COLUMN_COMMENT}' })
+  @Field(${columnRow.DATA_TYPE === 'json' ? '()=> GraphQLJSON, ' : ''}{ description: '${columnRow.COLUMN_COMMENT}'${nullable} })
   @Column({ comment: '${columnRow.COLUMN_COMMENT}', type: DataType.${sequelizeType} })
   ${inflect.camelize(columnRow.COLUMN_NAME, false)}?: ${enumTypeName || typeString};
 `;
 }
 
+/**
+ * 根据key生成主外建对象
+ * @param {*} typeString 
+ * @param {*} enumTypeName 
+ * @param {*} sequelizeType 
+ * @param {*} columnRow 
+ */
+const findForeignKey = (tableItem, keyColumnList) => {
+  // @Field({ description: '编码', nullable: true })
+  return keyColumnList.map(p => {
+    if (p.TABLE_NAME === tableItem.name) {
+      importBelongsTo = true;
+      // 子表 外键 BelongsTo
+      return `
+  @Field(() => ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model, {
+    description: '${p.TABLE_COMMENT}',
+    nullable: true,
+  })
+  @BelongsTo(() => ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model)
+  ${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}:  ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model;`;
+    } else {
+      importHasMany = true;
+      // 主表 主键 Hasmany
+      return `
+  @Field(() => [${inflect.camelize(p.TABLE_NAME)}Model], {
+    description: '${p.TABLE_COMMENT}',
+    nullable: true,
+  })
+  @HasMany(() => ${inflect.camelize(p.TABLE_NAME)}Model)
+  ${inflect.camelize(p.TABLE_NAME, false)}: Array<${inflect.camelize(p.TABLE_NAME)}Model>;`;
+    }
+  }).join('');
+}
+
 const modelTemplate = (propertyTxt, enumTxt, registerEnumType, constTxt, tableItem) => {
-  return `import { Table, Column, DataType } from 'sequelize-typescript';
-import { ModelBase } from 'libs/base/src/model.base';
+  const importSequelizeTypescript = ` ${importBelongsTo ? 'BelongsTo' : ''}, ${importHasMany ? 'HasMany' : ''} `;
+  return `import { Table, Column, DataType ${importSequelizeTypescript}} from 'sequelize-typescript';
+import { BaseModel } from '../base/base-model';
 import { ObjectType, Field } from '@nestjs/graphql';
-import GraphQLJSON from 'graphql-type-json';
 
 // #region enum${enumTxt}
 ${registerEnumType}
@@ -130,7 +172,7 @@ ${registerEnumType}
 @Table({
   tableName: '${tableItem.name}',
 })
-export class ${inflect.camelize(tableItem.name)}Model extends ModelBase {
+export class ${inflect.camelize(tableItem.name)}Model extends BaseModel {
 ${propertyTxt}
 }
 
@@ -147,10 +189,12 @@ ${constTxt}
  * @param {*} mysqlHelper 
  * @param {*} tableItem 
  */
-const findmodel = async (columnList, tableItem) => {
+const findmodel = async (columnList, tableItem, keyColumnList) => {
   let enumTxt = '', propertyTxt = '', constTxt = '', registerEnumType = '';
-  // columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
-  columnList.forEach(p => {
+  columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
+    // columnList.forEach(p => {
+    const keyColums = findForeignKey(tableItem, keyColumnList);
+    console.log(keyColums);
     const typeString = findTypeTxt(p);
     const colEnum = findEnum(p);
     enumTxt += _.get(colEnum, 'txt', '');

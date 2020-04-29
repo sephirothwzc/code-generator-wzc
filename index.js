@@ -3,7 +3,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-11 12:33:10
+ * @Last Modified time: 2020-04-28 09:05:46
  */
 
 const inquirer = require("inquirer");
@@ -13,17 +13,20 @@ const shell = require("shelljs");
 // const _ = require('lodash');
 const MysqlHelper = require('./utils/mysql-helper');
 // eslint-disable-next-line no-unused-vars
-const findmodel = require('./template/graphql-model');
+const findmodel = require('./template/graphql-sequelize-model');
 // eslint-disable-next-line no-unused-vars
 const findinput = require('./template/graphql-input');
 // eslint-disable-next-line no-unused-vars
 const findargs = require('./template/graphql-args');
+// eslint-disable-next-line no-unused-vars
+const findorder = require('./template/graphql-order');
 const fs = require('fs');
 
 const modelFunction = {
   findmodel,
   findinput,
-  findargs
+  findargs,
+  findorder
 }
 
 /**
@@ -178,15 +181,16 @@ const run = async () => {
   // 选择导出表格
   const result = await askListQuestions(nameList, 'tableName', 'checkbox');
   // 选择导出对象
-  const type = await askListQuestions(['model', 'args', 'input'], 'fileType', 'checkbox');
+  const type = await askListQuestions(['model', 'args', 'input', 'order'], 'fileType', 'checkbox');
   // // 输出目录 再说吧
   // const dirpath = await 
   result.tableName.forEach(async p => {
     const columnList = await mysqlHelper.queryColumn(p.name);
+    const keyColumnList = await mysqlHelper.queryKeyColumn(p.name);
     // 获取文件模版
     type.fileType.forEach(async t => {
       const funcName = `find${t}`;
-      const tempTxt = await modelFunction[funcName](columnList, p);
+      const tempTxt = await modelFunction[funcName](columnList, p, keyColumnList);
       const filename = p.name.replace(/_/g, '-');
       createFile(filename, tempTxt, t).then(() => {
         success(filename);

@@ -2,12 +2,13 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 23:05:41
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-09 23:00:47
+ * @Last Modified time: 2020-04-28 09:05:12
  */
 const mysql = require('mysql');
 
 const findTablesSql = Symbol();
 const findColumnSql = Symbol();
+const findKeyColumn = Symbol();
 
 class MySqlHelper {
   constructor(conn) {
@@ -24,6 +25,39 @@ class MySqlHelper {
     return `SELECT * FROM information_schema.columns WHERE table_schema='${
       this.connString.databaseName
       }' AND table_name='${tableName}' order by COLUMN_NAME`;
+  }
+
+  [findKeyColumn](tableName) {
+    /**
+     * C.TABLE_SCHEMA            拥有者
+     * C.REFERENCED_TABLE_NAME  父表名称 ,
+     * C.REFERENCED_COLUMN_NAME 父表字段 ,
+     * C.TABLE_NAME             子表名称,
+     * C.COLUMN_NAME            子表字段,
+     * C.CONSTRAINT_NAME        约束名,
+     * T.TABLE_COMMENT          表注释,
+     * R.UPDATE_RULE            约束更新规则,
+     * R.DELETE_RULE            约束删除规则
+     */
+    return `SELECT C.TABLE_SCHEMA,
+           C.REFERENCED_TABLE_NAME,
+           C.REFERENCED_COLUMN_NAME,
+           C.TABLE_NAME,
+           C.COLUMN_NAME,
+           C.CONSTRAINT_NAME,
+           T.TABLE_COMMENT,
+           R.UPDATE_RULE,
+           R.DELETE_RULE
+      FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE C
+      JOIN INFORMATION_SCHEMA. TABLES T
+        ON T.TABLE_NAME = C.TABLE_NAME
+      JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS R
+        ON R.TABLE_NAME = C.TABLE_NAME
+       AND R.CONSTRAINT_NAME = C.CONSTRAINT_NAME
+       AND R.REFERENCED_TABLE_NAME = C.REFERENCED_TABLE_NAME
+      WHERE C.REFERENCED_TABLE_NAME IS NOT NULL 
+				AND C.REFERENCED_TABLE_NAME = '${tableName}' or C.TABLE_NAME = '${tableName}'
+        AND C.TABLE_SCHEMA = '${this.connString.databaseName}'`;
   }
 
   async query(sql) {
@@ -59,6 +93,14 @@ class MySqlHelper {
 
   async queryColumn(tableName) {
     return this.query(this[findColumnSql](tableName));
+  }
+
+  /**
+   * 获取表外键
+   * @param {string} tableName 
+   */
+  async queryKeyColumn(tableName) {
+    return this.query(this[findKeyColumn](tableName))
   }
 }
 
