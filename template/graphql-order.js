@@ -2,13 +2,13 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-21 10:49:46
+ * @Last Modified time: 2020-04-30 18:35:14
  */
 // const _ = require('lodash');
 const inflect = require('i')();
 
 const modelTemplate = (propertyTxt, tableItem) => {
-  return `import { Order } from '../../common/order/order';
+  return `import { ModelOrder } from '../common/model-order';
 import { registerEnumType, Field, InputType } from '@nestjs/graphql';
 
 export enum ${inflect.camelize(tableItem.name)}OrderField {
@@ -20,8 +20,8 @@ registerEnumType(${inflect.camelize(tableItem.name)}OrderField, {
 });
 
 @InputType()
-export class ${inflect.camelize(tableItem.name)}Order extends Order {
-  @Field(type => ${inflect.camelize(tableItem.name)}OrderField)
+export class ${inflect.camelize(tableItem.name)}Order extends ModelOrder {
+  @Field(() => ${inflect.camelize(tableItem.name)}OrderField)
   field: ${inflect.camelize(tableItem.name)}OrderField;
 }
 `;
