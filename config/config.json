@@ -1,9 +1,18 @@
 {
   "dialect": "mysql",
-  "host": "rm-2zeaweolbpv98fozjpo.mysql.rds.aliyuncs.com",
-  "port": "3306",
-  "userName": "root_wzc",
-  "password": "Admin@123!9999",
-  "databaseName": "workflow",
-  "dbName": "workflow"
+  "host": "119.28.29.20",
+  "port": "6606",
+  "userName": "root",
+  "password": "Admin@123",
+  "databaseName": "advokate_fun_points_dev",
+  "dbName": "advokate_fun_points_dev",
+  "数据库连接": {
+    "dialect": "mysql",
+    "host": "rm-2zeaweolbpv98fozjpo.mysql.rds.aliyuncs.com",
+    "port": "3306",
+    "userName": "root_wzc",
+    "password": "Admin@123!9999",
+    "databaseName": "workflow",
+    "dbName": "workflow"
+  }
 }

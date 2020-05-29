@@ -2,7 +2,7 @@
  * @Author: 王肇峰 
  * @Date: 2020-04-20 14:10:46 
  * @Last Modified by: 王肇峰
- * @Last Modified time: 2020-04-20 16:24:21
+ * @Last Modified time: 2020-05-29 14:59:42
  */
 
 const _ = require('lodash');
@@ -20,6 +20,7 @@ const findTypeTxt = columnRow => {
     case 'bigint':
     case 'nvarchar':
     case 'varchar':
+    case 'text':
       return 'string';
     case 'timestamp':
     case 'int':
@@ -40,6 +41,8 @@ const findSequelizeType = element => {
     case 'nvarchar':
     case 'varchar':
       return `STRING(${element.CHARACTER_MAXIMUM_LENGTH})`;
+    case 'text':
+      return `TEXT`;
     case 'datetime':
       return `DATE`;
     case 'timestamp':
@@ -86,7 +89,7 @@ const findEnum = columnRow => {
     })
     .join(',')
     .toString();
-  const enumTypeName = _.camelCase(columnRow.COLUMN_NAME);
+  const enumTypeName = inflect.camelize(columnRow.COLUMN_NAME, true);
   const txt = `
 export enum E${enumTypeName} {
 ${ee}
@@ -133,7 +136,7 @@ const findProperty = (typeString, enumTypeName, sequelizeType, columnRow) => {
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */
   @Column({ comment: '${columnRow.COLUMN_COMMENT}' })
-  ${inflect.camelize(columnRow.COLUMN_NAME, false)}?: ${enumTypeName || typeString};
+  ${inflect.camelize(columnRow.COLUMN_NAME, false)}: ${enumTypeName || typeString};
 `;
 }
 
@@ -145,14 +148,13 @@ const findProperty = (typeString, enumTypeName, sequelizeType, columnRow) => {
  * @param {*} constTxt 字段名常量代码片段
  * @param {*} tableItem 数据库表信息object
  */
-const modelTemplate = (propertyTxt, enumTxt, registerEnumType, constTxt, tableItem) => {
+const modelTemplate = (propertyTxt, enumTxt, constTxt, tableItem) => {
 
   return `import { providerWrapper } from 'midway';
 import { Table, Column } from 'sequelize-typescript';
 import { BaseModel } from '../../base/base.model';
 
 // #region enum${enumTxt}
-${registerEnumType}
 // #endregion
 
 
@@ -192,18 +194,17 @@ providerWrapper([
  * @param {*} tableItem 
  */
 const findmodel = async (columnList, tableItem) => {
-  let enumTxt = '', propertyTxt = '', constTxt = '', registerEnumType = '';
+  let enumTxt = '', propertyTxt = '', constTxt = '';
   columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
     // columnList.forEach(p => {
     const typeString = findTypeTxt(p);
     const colEnum = findEnum(p);
     enumTxt += _.get(colEnum, 'txt', '');
-    registerEnumType += _.get(colEnum, 'registerEnumType', '');
     const sequelizeType = findSequelizeType(p);
     propertyTxt += findProperty(typeString, _.get(colEnum, 'enumTypeName'), sequelizeType, p);
     constTxt += findConst(p);
   });
-  return modelTemplate(propertyTxt, enumTxt, registerEnumType, constTxt, tableItem);
+  return modelTemplate(propertyTxt, enumTxt, constTxt, tableItem);
 }
 
 module.exports = findmodel;
