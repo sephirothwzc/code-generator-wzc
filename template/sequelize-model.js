@@ -2,7 +2,7 @@
  * @Author: 王肇峰 
  * @Date: 2020-04-20 14:10:46 
  * @Last Modified by: 王肇峰
- * @Last Modified time: 2020-05-29 14:59:42
+ * @Last Modified time: 2020-05-29 17:06:41
  */
 
 const _ = require('lodash');
@@ -195,12 +195,18 @@ providerWrapper([
  */
 const findmodel = async (columnList, tableItem) => {
   let enumTxt = '', propertyTxt = '', constTxt = '';
+  const sequelizeTypeSet = new Set();
   columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
     // columnList.forEach(p => {
     const typeString = findTypeTxt(p);
     const colEnum = findEnum(p);
     enumTxt += _.get(colEnum, 'txt', '');
     const sequelizeType = findSequelizeType(p);
+    if (_.startsWith(sequelizeType, 'STRING')) {
+      sequelizeTypeSet.add('STRING')
+    } else {
+      sequelizeTypeSet.add(sequelizeType);
+    }
     propertyTxt += findProperty(typeString, _.get(colEnum, 'enumTypeName'), sequelizeType, p);
     constTxt += findConst(p);
   });

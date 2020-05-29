@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: 王肇峰
- * @Last Modified time: 2020-05-29 16:21:55
+ * @Last Modified time: 2020-05-29 16:42:15
  */
 
 const inquirer = require("inquirer");
@@ -31,7 +31,7 @@ const modelFunction = {
 const init = () => {
   console.log(
     chalk.green(
-      figlet.textSync("zhanchao.wu", {
+      figlet.textSync("dafeng", {
         font: "Ghost",
         horizontalLayout: "default",
         verticalLayout: "default"
