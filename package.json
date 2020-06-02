@@ -8,7 +8,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "start sequelize": "node index-sequelize.js"
+    "sequelize": "node index-sequelize.js"
   },
   "dependencies": {
     "chalk": "^4.0.0",

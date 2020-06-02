@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: 王肇峰
- * @Last Modified time: 2020-05-29 16:42:15
+ * @Last Modified time: 2020-06-02 20:16:46
  */
 
 const inquirer = require("inquirer");
@@ -12,17 +12,14 @@ const shell = require("shelljs");
 // const _ = require('lodash');
 const MysqlHelper = require('./utils/mysql-helper');
 // eslint-disable-next-line no-unused-vars
-const findmodel = require('./template/sequelize-model');
+const findModel = require('./template/sequelize-model');
 // eslint-disable-next-line no-unused-vars
-const findinput = require('./template/graphql-input');
-// eslint-disable-next-line no-unused-vars
-const findargs = require('./template/graphql-args');
+const findInterface = require('./template/sequelize-interface');
 const fs = require('fs');
 
 const modelFunction = {
-  findmodel,
-  findinput,
-  findargs
+  findModel,
+  findInterface
 }
 
 /**
@@ -111,10 +108,10 @@ const askListQuestions = (list, key, type = 'list', message = key) => {
  * 创建文件
  * @param {string} filename 文件名
  */
-const createFile = async (filename, txt, type) => {
+const createFile = async (filename, txt, type, suffix) => {
   shell.mkdir('-p', `./out/${type}`);
   return new Promise((resolve, reject) => {
-    fs.writeFile(`./out/${type}/${filename}.${type}.ts`, txt, error => {
+    fs.writeFile(`./out/${type}/${filename}${suffix}.ts`, txt, error => {
       error ? reject(error) : resolve()
     });
   })
@@ -162,6 +159,7 @@ const confirmDBConfig = async ({ dbName }) => {
  * 执行
  */
 const run = async () => {
+  console.log('=== sequelize版本生成器运行 ===')
   // show script introduction
   init();
 
@@ -188,12 +186,29 @@ const run = async () => {
   if (!toFilter.skipTableName) {
     filterKey = await askListQuestions([], 'text', 'input', '输入关键字');
     nameList = nameList.filter(f => f.name.includes(filterKey.text))
-    console.log(nameList);
   }
   // 选择导出表格
   const result = await askListQuestions(nameList, 'tableName', 'checkbox');
   // 选择导出对象
-  const type = await askListQuestions(['model', 'args', 'input'], 'fileType', 'checkbox');
+  const type = await askListQuestions(['Model', 'Interface', 'SchemasIn', 'SchemasOut'], 'fileType', 'checkbox');
+  const fileType = {
+    Model: {
+      type: 'model',
+      suffix: '.model'
+    },
+    Interface: {
+      type: 'interface',
+      suffix: ''
+    },
+    SchemasIn: {
+      type: 'schemas',
+      suffix: ''
+    },
+    SchemasOut: {
+      type: 'schemas-out',
+      suffix: ''
+    }
+  }
   // TODO 输出目录 再说吧
   // const dirpath = await 
   result.tableName.forEach(async p => {
@@ -203,7 +218,7 @@ const run = async () => {
       const funcName = `find${t}`;
       const tempTxt = await modelFunction[funcName](columnList, p);
       const filename = p.name.replace(/_/g, '-');
-      createFile(filename, tempTxt, t).then(() => {
+      createFile(filename, tempTxt, fileType[t].type, fileType[t].suffix).then(() => {
         success(filename);
       }).catch(error => {
         console.error(

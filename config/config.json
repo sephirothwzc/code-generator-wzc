@@ -1,9 +1,9 @@
 {
   "dialect": "mysql",
-  "host": "119.28.29.20",
-  "port": "6606",
+  "host": "150.109.73.86",
+  "port": "16606",
   "userName": "root",
-  "password": "Admin@123",
+  "password": "advokate",
   "databaseName": "advokate_fun_points_dev",
   "dbName": "advokate_fun_points_dev",
   "数据库连接": {

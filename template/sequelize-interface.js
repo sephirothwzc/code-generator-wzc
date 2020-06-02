@@ -2,7 +2,7 @@
  * @Author: 王肇峰 
  * @Date: 2020-04-20 14:10:46 
  * @Last Modified by: 王肇峰
- * @Last Modified time: 2020-06-02 17:58:38
+ * @Last Modified time: 2020-06-02 18:33:36
  */
 
 const _ = require('lodash');
@@ -12,10 +12,6 @@ const inflect = require('i')();
  * 排除的列
  */
 const notColumn = [
-  'id',
-  'created_at',
-  'updated_at',
-  'deleted_at',
 ];
 
 /**
@@ -72,7 +68,7 @@ const findSequelizeType = columnRow => {
 }
 
 /**
- * 根据字段备注内容的预设格式，创建枚举类型
+ * 根据字段备注内容的预设格式，返回枚举名称
  * @param {*} columnRow 传入数据库表的字段对象
  */
 const findEnum = columnRow => {
@@ -84,35 +80,9 @@ const findEnum = columnRow => {
   if (!value) {
     return undefined;
   }
-  const ee = value[value.length - 1]
-    .replace('[', '')
-    .replace(']', '')
-    .split(',')
-    .map(p => {
-      const rd3 = p.split(' ');
-      const val = rd3[1] ? `= ${rd3[1]}` : '';
-      return `
-  /**
-   * ${rd3[2]}
-   */
-  ${rd3[0]} ${val}`;
-    })
-    .join(',')
-    .toString();
   const enumTypeName = inflect.camelize(columnRow.COLUMN_NAME, true);
-  const txt = `
-export enum E${enumTypeName} {
-${ee}
-}
-`;
-  const registerEnumType = `registerEnumType(E${enumTypeName}, {
-  name: 'E${enumTypeName}',
-});
-  `;
   return {
-    enumTypeName: `E${enumTypeName}`,
-    txt,
-    registerEnumType
+    enumTypeName: `E${enumTypeName}`
   }
 }
 
@@ -145,7 +115,6 @@ const findProperty = (typeString, enumTypeName, sequelizeType, columnRow) => {
   /**
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */
-  @Column({ comment: '${columnRow.COLUMN_COMMENT}' })
   ${inflect.camelize(columnRow.COLUMN_NAME, false)}: ${enumTypeName || typeString};
 `;
 }
@@ -159,46 +128,18 @@ const findProperty = (typeString, enumTypeName, sequelizeType, columnRow) => {
  * @param {*} tableItem 数据库表信息object
  */
 const modelTemplate = (propertyTxt, enumTxt, constTxt, tableItem) => {
+  const filename = tableItem.name.replace(/_/g, '-');
   // 如果有枚举，则需要使用INTEGER类型，添加导入代码
   let importType = '';
-  if (enumTxt && enumTxt.length > 4) {
-    importType = `import { INTEGER } from 'sequelize';`
+  if (enumTxt.length > 0) {
+    importType = `import { ${enumTxt.join(', ')} } from '../models/${filename}.model.ts';`
   }
-  return `import { providerWrapper } from 'midway';
-import { Table, Column } from 'sequelize-typescript';
-import { BaseModel } from '../../base/base.model';
+  return `
 ${importType}
 
-// #region enum${enumTxt}
-// #endregion
-
-
-/** 
- * 字段名常量类
- */
-export class Const${inflect.camelize(tableItem.name)} {
-  ${constTxt}
-}
-
-// 依赖注入用导出类型
-export type I${inflect.camelize(tableItem.name)}Model = typeof ${inflect.camelize(tableItem.name)}Model;
-
-@Table({
-  tableName: '${tableItem.name}'
-})
-export class ${inflect.camelize(tableItem.name)}Model extends BaseModel {
+export interface I${inflect.camelize(tableItem.name)} {
 ${propertyTxt}
 }
-
-// @provide 用 工厂模式static model
-export const factory = () => ${inflect.camelize(tableItem.name)}Model;
-providerWrapper([
-  {
-    id: '${inflect.camelize(tableItem.name)}Model',
-    provider: factory
-  }
-]);
-
 `;
 
 }
@@ -208,14 +149,16 @@ providerWrapper([
  * @param {*} mysqlHelper 
  * @param {*} tableItem 
  */
-const findModel = async (columnList, tableItem) => {
-  let enumTxt = '', propertyTxt = '', constTxt = '';
+const findInterface = async (columnList, tableItem) => {
+  let enumTxt = [], propertyTxt = '', constTxt = '';
   const sequelizeTypeSet = new Set();
   columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
     // columnList.forEach(p => {
     const typeString = findTypeTxt(p);
     const colEnum = findEnum(p);
-    enumTxt += _.get(colEnum, 'txt', '');
+    if (colEnum) {
+      enumTxt.push(colEnum.enumTypeName);
+    }
     const sequelizeType = findSequelizeType(p);
     if (_.startsWith(sequelizeType, 'STRING')) {
       sequelizeTypeSet.add('STRING')
@@ -228,4 +171,4 @@ const findModel = async (columnList, tableItem) => {
   return modelTemplate(propertyTxt, enumTxt, constTxt, tableItem);
 }
 
-module.exports = findModel;
+module.exports = findInterface;
