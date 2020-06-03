@@ -2,7 +2,7 @@
  * @Author: 王肇峰 
  * @Date: 2020-04-20 14:10:46 
  * @Last Modified by: 王肇峰
- * @Last Modified time: 2020-06-03 17:59:50
+ * @Last Modified time: 2020-06-03 18:04:07
  */
 
 const _ = require('lodash');
@@ -135,9 +135,9 @@ const findProperty = (typeString, enumTxt, sequelizeType, columnRow) => {
 const modelTemplate = (propertyTxt, tableItem) => {
   return `import * as joi from 'joi';
 
-export const S${inflect.camelize(tableItem.name)} = {
+export const S${inflect.camelize(tableItem.name)} = joi.object().keys({
 ${propertyTxt}
-}
+})
 `;
 
 }
@@ -147,7 +147,7 @@ ${propertyTxt}
  * @param {*} mysqlHelper 
  * @param {*} tableItem 
  */
-const findSchemasIn = async (columnList, tableItem) => {
+const findSchemasOut = async (columnList, tableItem) => {
   let propertyTxt = '';
   const sequelizeTypeSet = new Set();
   columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
@@ -165,4 +165,4 @@ const findSchemasIn = async (columnList, tableItem) => {
   return modelTemplate(propertyTxt, tableItem);
 }
 
-module.exports = findSchemasIn;
+module.exports = findSchemasOut;
