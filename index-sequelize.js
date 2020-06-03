@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: 王肇峰
- * @Last Modified time: 2020-06-02 20:16:46
+ * @Last Modified time: 2020-06-03 13:57:50
  */
 
 const inquirer = require("inquirer");
@@ -15,11 +15,14 @@ const MysqlHelper = require('./utils/mysql-helper');
 const findModel = require('./template/sequelize-model');
 // eslint-disable-next-line no-unused-vars
 const findInterface = require('./template/sequelize-interface');
+// eslint-disable-next-line no-unused-vars
+const findSchemasIn = require('./template/sequelize-schemas');
 const fs = require('fs');
 
 const modelFunction = {
   findModel,
-  findInterface
+  findInterface,
+  findSchemasIn
 }
 
 /**
