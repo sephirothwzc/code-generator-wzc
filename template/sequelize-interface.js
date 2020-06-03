@@ -2,7 +2,7 @@
  * @Author: 王肇峰 
  * @Date: 2020-04-20 14:10:46 
  * @Last Modified by: 王肇峰
- * @Last Modified time: 2020-06-02 18:33:36
+ * @Last Modified time: 2020-06-03 10:11:10
  */
 
 const _ = require('lodash');
@@ -132,7 +132,7 @@ const modelTemplate = (propertyTxt, enumTxt, constTxt, tableItem) => {
   // 如果有枚举，则需要使用INTEGER类型，添加导入代码
   let importType = '';
   if (enumTxt.length > 0) {
-    importType = `import { ${enumTxt.join(', ')} } from '../models/${filename}.model.ts';`
+    importType = `import { ${enumTxt.join(', ')} } from '../models/${filename}.model';`
   }
   return `
 ${importType}

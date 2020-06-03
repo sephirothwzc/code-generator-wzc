@@ -1,8 +1,8 @@
 /*
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 23:05:41
- * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-28 09:05:12
+ * @Last Modified by: 王肇峰
+ * @Last Modified time: 2020-06-03 10:04:24
  */
 const mysql = require('mysql');
 
@@ -16,15 +16,17 @@ class MySqlHelper {
   }
 
   [findTablesSql]() {
+    // 按照表名排序，查询数据库内的表集合
     return `select table_name AS name,table_comment AS comment from information_schema.tables where table_schema='${
       this.connString.databaseName
       }' order by table_name`;
   }
 
   [findColumnSql](tableName) {
+    // 按照字段顺序排序，查询数据表内的字段集合
     return `SELECT * FROM information_schema.columns WHERE table_schema='${
       this.connString.databaseName
-      }' AND table_name='${tableName}' order by COLUMN_NAME`;
+      }' AND table_name='${tableName}' order by ORDINAL_POSITION`;
   }
 
   [findKeyColumn](tableName) {
