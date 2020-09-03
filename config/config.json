@@ -1,9 +1,9 @@
 {
   "dialect": "mysql",
-  "host": "rm-8vbmop542231l4wx7co.mysql.zhangbei.rds.aliyuncs.com",
-  "port": "43306",
-  "userName": "root_wzc",
-  "password": "Admin@123",
-  "databaseName": "garbagesort_dev",
-  "dbName": "garbagesort_dev"
+  "host": "xx",
+  "port": "xx",
+  "userName": "xx",
+  "password": "xx",
+  "databaseName": "xx",
+  "dbName": "xx"
 }

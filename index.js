@@ -3,7 +3,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-04 00:39:47
+ * @Last Modified time: 2020-09-04 00:47:34
  */
 const path = require('path');
 const inquirer = require('inquirer');
@@ -151,8 +151,9 @@ const pathexists = async (configPath) => {
 
 const envConfig = async () => {
   // 判断是否midway config存在
-  const configPath = path.join(__dirname, 'database/config.json'),
-    localConfigPath = './config/config.json';
+  const configPath = './database/config.json',
+    // 本地文件
+    localConfigPath = path.join(__dirname, './config/config.json');
   const sequelizeCliConfigExists = await pathexists(configPath);
   const localConfig = await pathexists(localConfigPath);
   if (!sequelizeCliConfigExists && !localConfig) {
@@ -182,7 +183,7 @@ const envConfig = async () => {
 const setEnvConfig = async () => {
   // ask questions
   const answers = await askQuestions();
-  shell.echo(JSON.stringify(answers)).to('./config/config.json');
+  shell.echo(JSON.stringify(answers)).to(path.join(__dirname, './config/config.json'));
   return answers;
 };
 
