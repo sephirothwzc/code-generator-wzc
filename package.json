@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sephirothwzc/midway-joi-swagger2.git"
+    "url": "https://github.com/sephirothwzc/code-generator-wzc"
   },
   "author": "zhanchao.wu@icloud.com",
   "license": "MIT",
