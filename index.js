@@ -3,7 +3,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-04 01:05:02
+ * @Last Modified time: 2020-09-04 01:10:12
  */
 const path = require('path');
 const inquirer = require('inquirer');
@@ -85,11 +85,6 @@ const askQuestions = () => {
       name: 'database',
       type: 'input',
       message: '数据库？',
-    },
-    {
-      name: 'dbName',
-      type: 'input',
-      message: '数据库设置名称？',
     },
   ];
   return inquirer.prompt(questions);
@@ -187,12 +182,12 @@ const setEnvConfig = async () => {
 /**
  * 确认配置
  */
-const confirmDBConfig = async ({ dbName }) => {
+const confirmDBConfig = async ({ database }) => {
   const questions = [
     {
       name: 'dbRest',
       type: 'confirm',
-      message: `是否采用[${dbName}]设置`,
+      message: `是否采用[${database}]设置`,
       default: 'Y',
     },
   ];
@@ -209,7 +204,7 @@ const run = async () => {
 
   // 判断是否存在历史
   let answers = await envConfig();
-  if (!answers || !answers.dbName || (await confirmDBConfig(answers))) {
+  if (!answers || (await confirmDBConfig(answers))) {
     answers = await setEnvConfig();
   }
   // const { dialect, host, port, userName, password, database } = answers;
