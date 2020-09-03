@@ -3,14 +3,14 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-03 23:24:36
+ * @Last Modified time: 2020-09-03 23:33:37
  */
 
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 const figlet = require('figlet');
 const shell = require('shelljs');
-// const _ = require('lodash');
+const _ = require('lodash');
 const MysqlHelper = require('./utils/mysql-helper');
 // eslint-disable-next-line no-unused-vars
 const findmodel = require('./template/graphql-sequelize-model');
@@ -106,6 +106,9 @@ const askListQuestions = (list, key, type = 'list', message = key) => {
   return inquirer.prompt(questions);
 };
 
+const filePathObj = {
+  SequelizeModel: './src/lib/models',
+};
 /**
  * 创建文件
  * @param {string} filename 文件名
@@ -114,8 +117,9 @@ const createFile = async (filename, txt, type) => {
   shell.mkdir('-p', `./out/${type}`);
   // 文件名后缀
   const suffix = type !== 'SequelizeModel' ? type : 'model';
+  const filePath = _.get(filePathObj, type, './out/${type}');
   return new Promise((resolve, reject) => {
-    fs.writeFile(`./out/${type}/${filename}.${suffix}.ts`, txt, (error) => {
+    fs.writeFile(`${filePath}/${filename}.${suffix}.ts`, txt, (error) => {
       error ? reject(error) : resolve();
     });
   });

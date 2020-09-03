@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "description": "代码生成器 for zhanchao.wu",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sephirothwzc/midway-joi-swagger2.git"
+  },
   "author": "zhanchao.wu@icloud.com",
   "license": "MIT",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "codeGeneratorWzc": "node index.js"
   },
   "dependencies": {
     "chalk": "^4.0.0",
