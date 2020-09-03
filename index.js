@@ -3,7 +3,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-04 00:47:34
+ * @Last Modified time: 2020-09-04 01:05:02
  */
 const path = require('path');
 const inquirer = require('inquirer');
@@ -71,7 +71,7 @@ const askQuestions = () => {
       default: '3306',
     },
     {
-      name: 'userName',
+      name: 'username',
       type: 'input',
       message: '数据库登陆用户？',
       default: 'root',
@@ -82,7 +82,7 @@ const askQuestions = () => {
       message: '数据库登陆密码？',
     },
     {
-      name: 'databaseName',
+      name: 'database',
       type: 'input',
       message: '数据库？',
     },
@@ -169,10 +169,7 @@ const envConfig = async () => {
           "port": "xx",
           "dialect": "mysql"
      */
-    const config = JSON.parse(dbConfig).development;
-    config.databaseName = config.database;
-    config.dbName = config.database;
-    return config;
+    return JSON.parse(dbConfig).development;
   } else {
     const dbConfig = shell.cat('./config/config.json');
     // const dbConfig = shell.cat('./config/config.json');
@@ -215,7 +212,7 @@ const run = async () => {
   if (!answers || !answers.dbName || (await confirmDBConfig(answers))) {
     answers = await setEnvConfig();
   }
-  // const { dialect, host, port, userName, password, databaseName } = answers;
+  // const { dialect, host, port, userName, password, database } = answers;
 
   // #region find table
   const mysqlHelper = new MysqlHelper(answers);

@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 23:05:41
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-28 09:05:12
+ * @Last Modified time: 2020-09-04 01:04:44
  */
 const mysql = require('mysql');
 
@@ -12,19 +12,15 @@ const findKeyColumn = Symbol();
 
 class MySqlHelper {
   constructor(conn) {
-    this.connString = conn
+    this.connString = conn;
   }
 
   [findTablesSql]() {
-    return `select table_name AS name,table_comment AS comment from information_schema.tables where table_schema='${
-      this.connString.databaseName
-      }' order by table_name`;
+    return `select table_name AS name,table_comment AS comment from information_schema.tables where table_schema='${this.connString.database}' order by table_name`;
   }
 
   [findColumnSql](tableName) {
-    return `SELECT * FROM information_schema.columns WHERE table_schema='${
-      this.connString.databaseName
-      }' AND table_name='${tableName}' order by COLUMN_NAME`;
+    return `SELECT * FROM information_schema.columns WHERE table_schema='${this.connString.database}' AND table_name='${tableName}' order by COLUMN_NAME`;
   }
 
   [findKeyColumn](tableName) {
@@ -57,33 +53,33 @@ class MySqlHelper {
        AND R.REFERENCED_TABLE_NAME = C.REFERENCED_TABLE_NAME
       WHERE C.REFERENCED_TABLE_NAME IS NOT NULL 
 				AND C.REFERENCED_TABLE_NAME = '${tableName}' or C.TABLE_NAME = '${tableName}'
-        AND C.TABLE_SCHEMA = '${this.connString.databaseName}'`;
+        AND C.TABLE_SCHEMA = '${this.connString.database}'`;
   }
 
   async query(sql) {
     const connection = mysql.createConnection({
       host: this.connString.host,
       port: this.connString.port,
-      user: this.connString.userName,
+      user: this.connString.username,
       password: this.connString.password,
-      database: this.connString.databaseName
+      database: this.connString.database,
     });
 
-    await connection.connect(err => {
+    await connection.connect((err) => {
       if (err) {
         console.log(`err:${err}`);
       }
-    })
+    });
     const result = await new Promise((resolve, reject) => {
       connection.query(sql, (err, rows) => {
         if (err) {
           console.log(`query err:${err}`);
           reject(err);
         }
-        resolve(rows)
-      })
-    })
-    await connection.end(() => { })
+        resolve(rows);
+      });
+    });
+    await connection.end(() => {});
     return result;
   }
 
@@ -97,10 +93,10 @@ class MySqlHelper {
 
   /**
    * 获取表外键
-   * @param {string} tableName 
+   * @param {string} tableName
    */
   async queryKeyColumn(tableName) {
-    return this.query(this[findKeyColumn](tableName))
+    return this.query(this[findKeyColumn](tableName));
   }
 }
 

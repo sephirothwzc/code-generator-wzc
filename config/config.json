@@ -2,8 +2,7 @@
   "dialect": "mysql",
   "host": "xx",
   "port": "xx",
-  "userName": "xx",
+  "username": "xx",
   "password": "xx",
-  "databaseName": "xx",
-  "dbName": "xx"
+  "database": "xx"
 }
