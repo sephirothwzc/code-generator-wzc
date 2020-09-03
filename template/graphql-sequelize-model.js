@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-29 10:18:46
+ * @Last Modified time: 2020-09-03 23:27:57
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -11,18 +11,9 @@ let importHasMany = false;
 let importBelongsTo = false;
 let importForeignKey = false;
 
-const notColumn = [
-  'id',
-  'created_at',
-  'updated_at',
-  'deleted_at',
-  'created_user',
-  'updated_user',
-  'code',
-  'i18n'
-];
+const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'code', 'i18n'];
 
-const findTypeTxt = columnRow => {
+const findTypeTxt = (columnRow) => {
   switch (columnRow.DATA_TYPE) {
     case 'bigint':
     case 'nvarchar':
@@ -40,9 +31,9 @@ const findTypeTxt = columnRow => {
     case 'json':
       return 'Record<string, any>';
   }
-}
+};
 
-const findSequelizeType = element => {
+const findSequelizeType = (element) => {
   switch (element.DATA_TYPE) {
     case 'nvarchar':
     case 'varchar':
@@ -63,9 +54,9 @@ const findSequelizeType = element => {
     case 'json':
       return 'JSON';
   }
-}
+};
 
-const findEnum = columnRow => {
+const findEnum = (columnRow) => {
   if (!columnRow.COLUMN_COMMENT) {
     return undefined;
   }
@@ -78,7 +69,7 @@ const findEnum = columnRow => {
     .replace('[', '')
     .replace(']', '')
     .split(',')
-    .map(p => {
+    .map((p) => {
       const rd3 = p.split(' ');
       const val = rd3[1] ? `= ${rd3[1]}` : '';
       return `  /**
@@ -102,88 +93,80 @@ ${ee}
   return {
     enumTypeName: `E${enumTypeName}`,
     txt,
-    registerEnumType
-  }
-}
+    registerEnumType,
+  };
+};
 
 /**
  * field 不设置null
- * @param {*} typeString 
- * @param {*} enumTypeName 
- * @param {*} sequelizeType 
- * @param {*} columnRow 
+ * @param {*} typeString
+ * @param {*} enumTypeName
+ * @param {*} sequelizeType
+ * @param {*} columnRow
  */
 const findProperty = (typeString, enumTypeName, sequelizeType, columnRow, keyColumnList, tableItem) => {
   const nullable = columnRow.IS_NULLABLE === 'YES' ? ', nullable: true ' : '';
-  const foreignKey = keyColumnList.find(p => p.TABLE_NAME === tableItem.name && p.COLUMN_NAME === columnRow.COLUMN_NAME);
+  const foreignKey = keyColumnList.find((p) => p.TABLE_NAME === tableItem.name && p.COLUMN_NAME === columnRow.COLUMN_NAME);
   importForeignKey = !!foreignKey;
-  const foreignKeyTxt = foreignKey ? `
-  @ForeignKey(() => ${inflect.camelize(foreignKey.REFERENCED_TABLE_NAME)}Model)` : '';
+  const foreignKeyTxt = foreignKey
+    ? `
+  @ForeignKey(() => ${inflect.camelize(foreignKey.REFERENCED_TABLE_NAME)}Model)`
+    : '';
   // @Field({ description: '编码', nullable: true })
   return `  /**
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */
-  @Field(${columnRow.DATA_TYPE === 'json' ? '()=> GraphQLJSON, ' : ''}{ description: '${columnRow.COLUMN_COMMENT}'${nullable} })${foreignKeyTxt}
   @Column({ comment: '${columnRow.COLUMN_COMMENT}', type: DataType.${sequelizeType} })
   ${inflect.camelize(columnRow.COLUMN_NAME, false)}?: ${enumTypeName || typeString};
 `;
-}
+};
 
 /**
  * 根据key生成主外建对象
- * @param {*} typeString 
- * @param {*} enumTypeName 
- * @param {*} sequelizeType 
- * @param {*} columnRow 
+ * @param {*} typeString
+ * @param {*} enumTypeName
+ * @param {*} sequelizeType
+ * @param {*} columnRow
  */
 const findForeignKey = (tableItem, keyColumnList) => {
   // @Field({ description: '编码', nullable: true })
-  return keyColumnList.map(p => {
-    if (p.TABLE_NAME === tableItem.name) {
-      importBelongsTo = true;
-      // 子表 外键 BelongsTo
-      return `
-  @Field(() => ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model, {
-    description: '${p.TABLE_COMMENT}',
-    nullable: true,
-  })
+  return keyColumnList
+    .map((p) => {
+      if (p.TABLE_NAME === tableItem.name) {
+        importBelongsTo = true;
+        // 子表 外键 BelongsTo
+        return `
   @BelongsTo(() => ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model)
   ${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}:  ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model;
 `;
-    } else {
-      importHasMany = true;
-      // 主表 主键 Hasmany
-      return `
-  @Field(() => [${inflect.camelize(p.TABLE_NAME)}Model], {
-    description: '${p.TABLE_COMMENT}',
-    nullable: true,
-  })
+      } else {
+        importHasMany = true;
+        // 主表 主键 Hasmany
+        return `
   @HasMany(() => ${inflect.camelize(p.TABLE_NAME)}Model)
   ${inflect.camelize(p.TABLE_NAME, false)}: Array<${inflect.camelize(p.TABLE_NAME)}Model>;
 `;
-    }
-  }).join('');
-}
+      }
+    })
+    .join('');
+};
 
 const modelTemplate = (propertyTxt, enumTxt, registerEnumType, constTxt, tableItem, keyColums) => {
-  const importSequelizeTypescript = `${
-    importBelongsTo ? ', BelongsTo' : ''
-    }${
-    importHasMany ? ', HasMany' : ''
-    }${
-    importForeignKey ? ', ForeignKey' : ''
-    }`;
-  return `import { Table, Column, DataType${importSequelizeTypescript}} from 'sequelize-typescript';
-import { BaseModel } from '../base/base-model';
-import { ObjectType, Field } from '@nestjs/graphql';
+  const importSequelizeTypescript = `${importBelongsTo ? ', BelongsTo' : ''}${importHasMany ? ', HasMany' : ''}${importForeignKey ? ', ForeignKey' : ''}`;
+  return `import { Table, Column, DataType${importSequelizeTypescript} } from 'sequelize-typescript';
+import { BaseModel } from '../base/model.base';
+import { providerWrapper } from 'midway';
 
 // #region enum${enumTxt}
 ${registerEnumType}
 // #endregion
 
-@ObjectType({ description: '${tableItem.comment}' })
+// 依赖注入 导出类型
+export type I${inflect.camelize(tableItem.name)}Model = typeof ${inflect.camelize(tableItem.name)}Model;
+
 @Table({
   tableName: '${tableItem.name}',
+  comment: '${tableItem.comment}',
 })
 export class ${inflect.camelize(tableItem.name)}Model extends BaseModel {
 ${propertyTxt}${keyColums}
@@ -193,37 +176,51 @@ ${propertyTxt}${keyColums}
 export class ${_.toUpper(tableItem.name)} {
 ${constTxt}
 }
-`;
 
-}
+// @provide 用 工厂模式static model
+export const factory = () => ${inflect.camelize(tableItem.name)}Model;
+providerWrapper([
+  {
+    id: '${_.camelCase(tableItem.name)}Model',
+    provider: factory,
+  },
+]);
+`;
+};
 
 /**
- * 
- * @param {*} mysqlHelper 
- * @param {*} tableItem 
+ *
+ * @param {*} mysqlHelper
+ * @param {*} tableItem
  */
-const findmodel = async (columnList, tableItem, keyColumnList) => {
+const findSequelizeModel = async (columnList, tableItem, keyColumnList) => {
   importHasMany = false;
   importBelongsTo = false;
   importForeignKey = false;
-  let enumTxt = '', propertyTxt = '', constTxt = '', registerEnumType = '', keyColums = '';
-  columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
-    // columnList.forEach(p => {
-    keyColums = findForeignKey(tableItem, keyColumnList);
-    const typeString = findTypeTxt(p);
-    const colEnum = findEnum(p);
-    enumTxt += _.get(colEnum, 'txt', '');
-    registerEnumType += _.get(colEnum, 'registerEnumType', '');
-    const sequelizeType = findSequelizeType(p);
-    propertyTxt += findProperty(typeString, _.get(colEnum, 'enumTypeName'), sequelizeType, p, keyColumnList, tableItem);
-    constTxt += `
+  let enumTxt = '',
+    propertyTxt = '',
+    constTxt = '',
+    registerEnumType = '',
+    keyColums = '';
+  columnList
+    .filter((p) => !notColumn.includes(p.COLUMN_NAME))
+    .forEach((p) => {
+      // columnList.forEach(p => {
+      keyColums = findForeignKey(tableItem, keyColumnList);
+      const typeString = findTypeTxt(p);
+      const colEnum = findEnum(p);
+      enumTxt += _.get(colEnum, 'txt', '');
+      registerEnumType += _.get(colEnum, 'registerEnumType', '');
+      const sequelizeType = findSequelizeType(p);
+      propertyTxt += findProperty(typeString, _.get(colEnum, 'enumTypeName'), sequelizeType, p, keyColumnList, tableItem);
+      constTxt += `
   /**
    * ${p.COLUMN_COMMENT}
    */
   static readonly ${_.toUpper(p.COLUMN_NAME)}: string = '${_.camelCase(p.COLUMN_NAME)}';
-`
-  });
+`;
+    });
   return modelTemplate(propertyTxt, enumTxt, registerEnumType, constTxt, tableItem, keyColums);
-}
+};
 
-module.exports = findmodel;
+module.exports = findSequelizeModel;

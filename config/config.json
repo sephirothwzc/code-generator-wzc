@@ -1,1 +1,9 @@
-{"dialect":"mysql","host":"rm-2zeaweolbpv98fozjpo.mysql.rds.aliyuncs.com","port":"3306","userName":"root_wzc","password":"Admin@123!9999","databaseName":"workflow","dbName":"workflow"}
+{
+  "dialect": "mysql",
+  "host": "rm-8vbmop542231l4wx7co.mysql.zhangbei.rds.aliyuncs.com",
+  "port": "43306",
+  "userName": "root_wzc",
+  "password": "Admin@123",
+  "databaseName": "garbagesort_dev",
+  "dbName": "garbagesort_dev"
+}
