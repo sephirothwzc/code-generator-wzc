@@ -3,9 +3,9 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-03 23:33:37
+ * @Last Modified time: 2020-09-04 00:39:47
  */
-
+const path = require('path');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 const figlet = require('figlet');
@@ -23,6 +23,7 @@ const findorder = require('./template/graphql-order');
 
 const findSequelizeModel = require('./template/graphql-sequelize-model');
 const fs = require('fs');
+const { promisify } = require('util');
 
 const modelFunction = {
   findmodel,
@@ -133,9 +134,49 @@ const success = (filepath) => {
   console.log(chalk.white.bgGreen.bold(`Done! File created`) + `\t [${filepath}]`);
 };
 
-const envConfig = () => {
-  const dbConfig = shell.cat('./config/config.json');
-  return JSON.parse(dbConfig);
+/**
+ * 路径是否存在
+ * @param {string} configPath
+ */
+const pathexists = async (configPath) => {
+  const accessAsync = promisify(fs.access);
+  return accessAsync(configPath)
+    .then(() => {
+      return true;
+    })
+    .catch(() => {
+      return false;
+    });
+};
+
+const envConfig = async () => {
+  // 判断是否midway config存在
+  const configPath = path.join(__dirname, 'database/config.json'),
+    localConfigPath = './config/config.json';
+  const sequelizeCliConfigExists = await pathexists(configPath);
+  const localConfig = await pathexists(localConfigPath);
+  if (!sequelizeCliConfigExists && !localConfig) {
+    console.error(chalk.white.bgRed.bold(`Error: `) + `\t [${configPath}] not find,must have local sequelize-cli!`);
+    throw new Error(`\t [${configPath}] not find,must have local sequelize-cli!`);
+  } else if (sequelizeCliConfigExists) {
+    const dbConfig = shell.cat(configPath);
+    /**
+     *    "username": "xx",
+          "password": "xx",
+          "database": "xx",
+          "host": "xx",
+          "port": "xx",
+          "dialect": "mysql"
+     */
+    const config = JSON.parse(dbConfig).development;
+    config.databaseName = config.database;
+    config.dbName = config.database;
+    return config;
+  } else {
+    const dbConfig = shell.cat('./config/config.json');
+    // const dbConfig = shell.cat('./config/config.json');
+    return JSON.parse(dbConfig);
+  }
 };
 
 const setEnvConfig = async () => {
@@ -169,7 +210,7 @@ const run = async () => {
   init();
 
   // 判断是否存在历史
-  let answers = envConfig();
+  let answers = await envConfig();
   if (!answers || !answers.dbName || (await confirmDBConfig(answers))) {
     answers = await setEnvConfig();
   }

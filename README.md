@@ -9,7 +9,22 @@ egg、midway
 使用说明：
 
 ```node
-$ npm install codeGeneratorWzc --save-dev
+$ npm install code-generator-wzc --save-dev
 # or yarn
-$ yarn add codeGeneratorWzc -D
+$ yarn add code-generator-wzc -D
+```
+
+package.json
+
+```md
+"scripts": {
+"codeGeneratorWzc": "node ./node_modules/code-generator-wzc/index.js"
+}
+```
+
+run
+
+```node
+# run
+$ yarn codeGeneratorWzc
 ```

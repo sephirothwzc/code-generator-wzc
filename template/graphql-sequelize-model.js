@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-03 23:27:57
+ * @Last Modified time: 2020-09-04 00:24:05
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -105,7 +105,7 @@ ${ee}
  * @param {*} columnRow
  */
 const findProperty = (typeString, enumTypeName, sequelizeType, columnRow, keyColumnList, tableItem) => {
-  const nullable = columnRow.IS_NULLABLE === 'YES' ? ', nullable: true ' : '';
+  const nullable = columnRow.IS_NULLABLE === 'YES' ? '?' : '';
   const foreignKey = keyColumnList.find((p) => p.TABLE_NAME === tableItem.name && p.COLUMN_NAME === columnRow.COLUMN_NAME);
   importForeignKey = !!foreignKey;
   const foreignKeyTxt = foreignKey
@@ -115,9 +115,9 @@ const findProperty = (typeString, enumTypeName, sequelizeType, columnRow, keyCol
   // @Field({ description: '编码', nullable: true })
   return `  /**
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
-   */
+   */${foreignKeyTxt}
   @Column({ comment: '${columnRow.COLUMN_COMMENT}', type: DataType.${sequelizeType} })
-  ${inflect.camelize(columnRow.COLUMN_NAME, false)}?: ${enumTypeName || typeString};
+  ${inflect.camelize(columnRow.COLUMN_NAME, false)}${nullable}: ${enumTypeName || typeString};
 `;
 };
 
