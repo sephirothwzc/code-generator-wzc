@@ -3,7 +3,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-04 01:10:12
+ * @Last Modified time: 2020-09-04 01:15:26
  */
 const path = require('path');
 const inquirer = require('inquirer');
@@ -110,10 +110,10 @@ const filePathObj = {
  * @param {string} filename 文件名
  */
 const createFile = async (filename, txt, type) => {
-  shell.mkdir('-p', `./out/${type}`);
   // 文件名后缀
   const suffix = type !== 'SequelizeModel' ? type : 'model';
-  const filePath = _.get(filePathObj, type, './out/${type}');
+  const filePath = _.get(filePathObj, type, `./out/${type}`);
+  shell.mkdir('-p', filePath);
   return new Promise((resolve, reject) => {
     fs.writeFile(`${filePath}/${filename}.${suffix}.ts`, txt, (error) => {
       error ? reject(error) : resolve();
