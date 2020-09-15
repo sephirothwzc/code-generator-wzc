@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-15 13:39:53
+ * @Last Modified time: 2020-09-15 13:44:08
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -64,7 +64,7 @@ const findSequelizeType = (element) => {
     case 'tinytext':
       return `TEXT('tinytext')`;
     case 'enum':
-      return element.COLUMN_TYPE;
+      return element.COLUMN_TYPE.replace('enum', 'ENUM');
   }
 };
 
