@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-04 00:24:05
+ * @Last Modified time: 2020-09-15 11:30:34
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -30,6 +30,8 @@ const findTypeTxt = (columnRow) => {
       return 'boolean';
     case 'json':
       return 'Record<string, any>';
+    default:
+      return 'string';
   }
 };
 
@@ -53,33 +55,69 @@ const findSequelizeType = (element) => {
       return 'DOUBLE';
     case 'json':
       return 'JSON';
+    case 'mediumtext':
+      return `TEXT('mediumtext')`;
+    case 'multilinestring':
+      return `TEXT('multilinestring')`;
+    case 'text':
+      return 'TEXT';
+    case 'tinytext':
+      return `TEXT('tinytext')`;
+    case 'enum':
+      return `ENUM`;
   }
 };
 
+/**
+ * comment [info 1 初始化,close 0 关闭] or [info 初始化,close 关闭]or [info,close]
+ * @param {*} columnRow 行
+ */
 const findEnum = (columnRow) => {
-  if (!columnRow.COLUMN_COMMENT) {
+  let value;
+  if (!columnRow.COLUMN_COMMENT && columnRow.DATA_TYPE !== 'enum') {
     return undefined;
   }
-  const regex2 = /\[(.+?)\]/g; // [] 中括号
-  const value = columnRow.COLUMN_COMMENT.match(regex2);
+  if (columnRow.COLUMN_COMMENT) {
+    const regex2 = /\[(.+?)\]/g; // [] 中括号
+    value = columnRow.COLUMN_COMMENT.match(regex2);
+    if (value) {
+      value = value.replace(/[[]]/g, '');
+    }
+  }
+  if (columnRow.DATA_TYPE === 'enum' && !value) {
+    value = columnRow.COLUMN_TYPE.replace('enum', '').replace(/[()']/g, '');
+    console.log(value);
+  }
   if (!value) {
     return undefined;
   }
-  const ee = value[value.length - 1]
-    .replace('[', '')
-    .replace(']', '')
-    .split(',')
+  const ee = value
+    .split(/[,，]/)
     .map((p) => {
+      console.log(p);
       const rd3 = p.split(' ');
-      const val = rd3[1] ? `= ${rd3[1]}` : '';
-      return `  /**
+      if (rd3.length === 3) {
+        const val = rd3[1] ? `= ${rd3[1]}` : '';
+        return `  /**
    * ${rd3[2]}
    */
-  ${rd3[0]}${val}
-  `;
+  ${rd3[0]}${val},
+`;
+      } else if (rd3.length === 2) {
+        return `  /**
+   * ${rd3[1]}
+   */
+  ${rd3[0]} = '${rd3[0]}',
+`;
+      } else {
+        return `  /**
+   *
+   */
+  ${rd3[0]} = '${rd3[0]}',
+`;
+      }
     })
-    .join(',')
-    .toString();
+    .join('');
   const enumTypeName = _.camelCase(columnRow.COLUMN_NAME);
   const txt = `
 export enum E${enumTypeName} {
