@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-15 11:30:34
+ * @Last Modified time: 2020-09-15 11:41:54
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -86,7 +86,6 @@ const findEnum = (columnRow) => {
   }
   if (columnRow.DATA_TYPE === 'enum' && !value) {
     value = columnRow.COLUMN_TYPE.replace('enum', '').replace(/[()']/g, '');
-    console.log(value);
   }
   if (!value) {
     return undefined;
@@ -94,7 +93,6 @@ const findEnum = (columnRow) => {
   const ee = value
     .split(/[,，]/)
     .map((p) => {
-      console.log(p);
       const rd3 = p.split(' ');
       if (rd3.length === 3) {
         const val = rd3[1] ? `= ${rd3[1]}` : '';
