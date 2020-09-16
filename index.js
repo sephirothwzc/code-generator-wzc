@@ -3,7 +3,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-04 01:15:26
+ * @Last Modified time: 2020-09-16 18:44:09
  */
 const path = require('path');
 const inquirer = require('inquirer');
@@ -22,15 +22,19 @@ const findargs = require('./template/graphql-args');
 const findorder = require('./template/graphql-order');
 
 const findSequelizeModel = require('./template/graphql-sequelize-model');
+
+const findservice = require('./template/service');
+
 const fs = require('fs');
 const { promisify } = require('util');
 
 const modelFunction = {
+  findSequelizeModel,
+  findservice,
   findmodel,
   findinput,
   findargs,
   findorder,
-  findSequelizeModel,
 };
 
 /**
@@ -104,6 +108,7 @@ const askListQuestions = (list, key, type = 'list', message = key) => {
 
 const filePathObj = {
   SequelizeModel: './src/lib/models',
+  service: './src/service',
 };
 /**
  * 创建文件
@@ -223,7 +228,7 @@ const run = async () => {
   // 选择导出表格
   const result = await askListQuestions(nameList, 'tableName', 'checkbox');
   // 选择导出对象
-  const type = await askListQuestions(['model', 'args', 'input', 'order', 'SequelizeModel'], 'fileType', 'checkbox');
+  const type = await askListQuestions(['SequelizeModel', 'service', 'model', 'args', 'input', 'order'], 'fileType', 'checkbox');
   // // 输出目录 再说吧
   // const dirpath = await
   result.tableName.forEach(async (p) => {
