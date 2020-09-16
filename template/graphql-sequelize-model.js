@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-16 18:13:47
+ * @Last Modified time: 2020-09-16 18:18:46
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -27,6 +27,7 @@ const findTypeTxt = (columnRow) => {
     case 'datetime':
       return `Date`;
     case 'boolean':
+    case 'tinyint':
       return 'boolean';
     case 'json':
       return 'Record<string, any>';
@@ -48,6 +49,7 @@ const findSequelizeType = (element) => {
     case 'decimal':
       return `DECIMAL`;
     case 'boolean':
+    case 'tinyint':
       return 'BOOLEAN';
     case 'bigint':
       return 'BIGINT';
