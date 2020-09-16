@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-15 13:44:08
+ * @Last Modified time: 2020-09-16 18:13:47
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -11,7 +11,7 @@ let importHasMany = false;
 let importBelongsTo = false;
 let importForeignKey = false;
 
-const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'code', 'i18n'];
+const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'created_id', 'updated_id', 'deleted_id', 'code', 'i18n'];
 
 const findTypeTxt = (columnRow) => {
   switch (columnRow.DATA_TYPE) {
@@ -81,7 +81,7 @@ const findEnum = (columnRow) => {
     const regex2 = /\[(.+?)\]/g; // [] 中括号
     value = columnRow.COLUMN_COMMENT.match(regex2);
     if (value) {
-      value = value.replace(/[[]]/g, '');
+      value = value[value.length - 1].replace('[', '').replace(']', '');
     }
   }
   if (columnRow.DATA_TYPE === 'enum' && !value) {
@@ -95,7 +95,7 @@ const findEnum = (columnRow) => {
     .map((p) => {
       const rd3 = p.split(' ');
       if (rd3.length === 3) {
-        const val = rd3[1] ? `= ${rd3[1]}` : '';
+        const val = rd3[1] ? ` = '${rd3[1]}'` : '';
         return `  /**
    * ${rd3[2]}
    */
@@ -116,20 +116,16 @@ const findEnum = (columnRow) => {
       }
     })
     .join('');
-  const enumTypeName = _.camelCase(columnRow.COLUMN_NAME);
+  const enumTypeName = inflect.camelize(columnRow.COLUMN_NAME);
   const txt = `
 export enum E${enumTypeName} {
 ${ee}
 }
 `;
-  const registerEnumType = `registerEnumType(E${enumTypeName}, {
-  name: 'E${enumTypeName}',
-});
-  `;
+
   return {
     enumTypeName: `E${enumTypeName}`,
     txt,
-    registerEnumType,
   };
 };
 

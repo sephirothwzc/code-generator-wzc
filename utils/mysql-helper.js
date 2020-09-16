@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 23:05:41
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-04 01:04:44
+ * @Last Modified time: 2020-09-16 18:12:01
  */
 const mysql = require('mysql');
 
@@ -16,7 +16,7 @@ class MySqlHelper {
   }
 
   [findTablesSql]() {
-    return `select table_name AS name,table_comment AS comment from information_schema.tables where table_schema='${this.connString.database}' order by table_name`;
+    return `select table_name AS name,table_comment AS comment from information_schema.tables where table_name <> 'sequelizemeta' and table_schema='${this.connString.database}' order by table_name`;
   }
 
   [findColumnSql](tableName) {
