@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-09-16 18:36:37
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-17 19:14:04
+ * @Last Modified time: 2020-09-17 19:59:50
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -37,7 +37,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
       txtImport.add(`import { ${inflect.camelize(p.TABLE_NAME)}Model } from '../lib/models/${inflect.camelize(p.TABLE_NAME, false)}.model';`);
       return `param.${inflect.camelize(p.TABLE_NAME, false)} &&
       param.${inflect.camelize(p.TABLE_NAME, false)}.length > 0 &&
-      include.push({ association: ${inflect.camelize(p.TABLE_NAME)}Model, as: '${inflect.camelize(p.TABLE_NAME, false)}' });`;
+      include.push({ model: ${inflect.camelize(p.TABLE_NAME)}Model, as: '${inflect.camelize(p.TABLE_NAME, false)}' });`;
     }).join(`
     `);
   if (!txtIf) {
