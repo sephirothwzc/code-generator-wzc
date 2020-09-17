@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-09-16 18:36:37
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-17 18:58:26
+ * @Last Modified time: 2020-09-17 19:14:04
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -23,7 +23,7 @@ const inflect = require('i')();
  */
 
 const findForeignKey = (tableItem, keyColumnList) => {
-  const txtImport = [];
+  const txtImport = new Set();
   // @Field({ description: '编码', nullable: true })
   const txtIf = keyColumnList
     .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
@@ -34,7 +34,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
   const txtObj = keyColumnList
     .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
     .map((p) => {
-      txtImport.push(`import { ${inflect.camelize(p.TABLE_NAME)}Model } from '../lib/models/${inflect.camelize(p.TABLE_NAME, false)}.model';`);
+      txtImport.add(`import { ${inflect.camelize(p.TABLE_NAME)}Model } from '../lib/models/${inflect.camelize(p.TABLE_NAME, false)}.model';`);
       return `param.${inflect.camelize(p.TABLE_NAME, false)} &&
       param.${inflect.camelize(p.TABLE_NAME, false)}.length > 0 &&
       include.push({ association: ${inflect.camelize(p.TABLE_NAME)}Model, as: '${inflect.camelize(p.TABLE_NAME, false)}' });`;
@@ -63,7 +63,7 @@ const modelTemplate = (tableItem, keyColumnList) => {
   return `import { provide, inject } from 'midway';
 import { ServiceBase } from '../lib/base/service.base';
 import { I${inflect.camelize(tableItem.name)}Model } from '../lib/models/${tableItem.name.replace(/_/g, '-')}.model';
-${txtImport.join(`
+${Array.from(txtImport).join(`
 `)}
 
 export interface I${inflect.camelize(tableItem.name)}Service extends ${inflect.camelize(tableItem.name)}Service {}

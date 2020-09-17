@@ -2,15 +2,14 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-17 18:57:34
+ * @Last Modified time: 2020-09-17 19:14:43
  */
 const _ = require('lodash');
 const inflect = require('i')();
 // 是否添加引用
 let importHasMany = false;
 let importBelongsTo = false;
-let importForeignKey = false;
-let txtImport = [];
+let txtImport = new Set();
 
 const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'created_id', 'updated_id', 'deleted_id', 'code', 'i18n'];
 
@@ -142,7 +141,6 @@ ${ee}
 const findProperty = (typeString, enumTypeName, sequelizeType, columnRow, keyColumnList, tableItem) => {
   const nullable = columnRow.IS_NULLABLE === 'YES' ? '?' : '';
   const foreignKey = keyColumnList.find((p) => p.TABLE_NAME === tableItem.name && p.COLUMN_NAME === columnRow.COLUMN_NAME);
-  importForeignKey = !!foreignKey;
   const foreignKeyTxt = foreignKey
     ? `
   @ForeignKey(() => ${inflect.camelize(foreignKey.REFERENCED_TABLE_NAME)}Model)`
@@ -167,8 +165,8 @@ const findForeignKey = (tableItem, keyColumnList) => {
   // @Field({ description: '编码', nullable: true })
   return keyColumnList
     .map((p) => {
-      txtImport.push(`import { ${inflect.camelize(p.TABLE_NAME)}Model } from '../lib/models/${inflect.camelize(p.TABLE_NAME, false)}.model';`);
       if (p.TABLE_NAME === tableItem.name) {
+        txtImport.add(`import { ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model } from './${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}.model';`);
         importBelongsTo = true;
         // 子表 外键 BelongsTo
         return `
@@ -176,6 +174,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
   ${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}: ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model;
 `;
       } else {
+        txtImport.add(`import { ${inflect.camelize(p.TABLE_NAME)}Model } from './${inflect.camelize(p.TABLE_NAME, false)}.model';`);
         importHasMany = true;
         // 主表 主键 Hasmany
         return `
@@ -188,11 +187,11 @@ const findForeignKey = (tableItem, keyColumnList) => {
 };
 
 const modelTemplate = (propertyTxt, enumTxt, registerEnumType, constTxt, tableItem, keyColums) => {
-  const importSequelizeTypescript = `${importBelongsTo ? ', BelongsTo' : ''}${importHasMany ? ', HasMany' : ''}${importForeignKey ? ', ForeignKey' : ''}`;
+  const importSequelizeTypescript = `${importBelongsTo ? ', BelongsTo, ForeignKey' : ''}${importHasMany ? ', HasMany' : ''}`;
   return `import { Table, Column, DataType${importSequelizeTypescript} } from 'sequelize-typescript';
 import { BaseModel } from '../base/model.base';
 import { providerWrapper } from 'midway';
-${txtImport.join(`
+${Array.from(txtImport).join(`
 `)}
 
 // #region enum${enumTxt}
@@ -232,10 +231,9 @@ providerWrapper([
  * @param {*} tableItem
  */
 const findSequelizeModel = async (columnList, tableItem, keyColumnList) => {
-  txtImport = [];
+  txtImport = new Set();
   importHasMany = false;
   importBelongsTo = false;
-  importForeignKey = false;
   let enumTxt = '',
     propertyTxt = '',
     constTxt = '',
