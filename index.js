@@ -3,7 +3,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-16 18:44:09
+ * @Last Modified time: 2020-09-17 09:51:21
  */
 const path = require('path');
 const inquirer = require('inquirer');
@@ -13,17 +13,21 @@ const shell = require('shelljs');
 const _ = require('lodash');
 const MysqlHelper = require('./utils/mysql-helper');
 // eslint-disable-next-line no-unused-vars
-const findmodel = require('./template/graphql-sequelize-model');
+// const findmodel = require('./template/graphql-sequelize-model');
 // eslint-disable-next-line no-unused-vars
-const findinput = require('./template/graphql-input');
+// const findinput = require('./template/graphql-input');
 // eslint-disable-next-line no-unused-vars
-const findargs = require('./template/graphql-args');
+// const findargs = require('./template/graphql-args');
 // eslint-disable-next-line no-unused-vars
-const findorder = require('./template/graphql-order');
+// const findorder = require('./template/graphql-order');
 
 const findSequelizeModel = require('./template/graphql-sequelize-model');
 
 const findservice = require('./template/service');
+
+const findgraphql = require('./template/graphql-gql');
+
+const findresolver = require('./template/graphql-resolver');
 
 const fs = require('fs');
 const { promisify } = require('util');
@@ -31,12 +35,16 @@ const { promisify } = require('util');
 const modelFunction = {
   findSequelizeModel,
   findservice,
-  findmodel,
-  findinput,
-  findargs,
-  findorder,
+  findgraphql,
+  findresolver,
+  // findmodel,
+  // findinput,
+  // findargs,
+  // findorder,
 };
 
+// const codeTypeArray = ['SequelizeModel', 'service', 'graphql', 'model', 'args', 'input', 'order'];
+const codeTypeArray = ['SequelizeModel', 'service', 'graphql', 'resolver'];
 /**
  * 初始化
  */
@@ -109,15 +117,26 @@ const askListQuestions = (list, key, type = 'list', message = key) => {
 const filePathObj = {
   SequelizeModel: './src/lib/models',
   service: './src/service',
+  graphql: './src/app/graphql',
+  resolver: './src/app/graphql',
 };
 /**
  * 创建文件
  * @param {string} filename 文件名
  */
 const createFile = async (filename, txt, type) => {
+  const filePath = _.get(filePathObj, type, `./out/${type}`);
+  if (type === 'graphql' || type === 'resolver') {
+    const codeName = type === 'graphql' ? 'schema.graphql' : 'resolver.js';
+    shell.mkdir('-p', `${filePath}/${filename}`);
+    return new Promise((resolve, reject) => {
+      fs.writeFile(`${filePath}/${filename}/${codeName}`, txt, (error) => {
+        error ? reject(error) : resolve();
+      });
+    });
+  }
   // 文件名后缀
   const suffix = type !== 'SequelizeModel' ? type : 'model';
-  const filePath = _.get(filePathObj, type, `./out/${type}`);
   shell.mkdir('-p', filePath);
   return new Promise((resolve, reject) => {
     fs.writeFile(`${filePath}/${filename}.${suffix}.ts`, txt, (error) => {
@@ -228,7 +247,7 @@ const run = async () => {
   // 选择导出表格
   const result = await askListQuestions(nameList, 'tableName', 'checkbox');
   // 选择导出对象
-  const type = await askListQuestions(['SequelizeModel', 'service', 'model', 'args', 'input', 'order'], 'fileType', 'checkbox');
+  const type = await askListQuestions(codeTypeArray, 'fileType', 'checkbox');
   // // 输出目录 再说吧
   // const dirpath = await
   result.tableName.forEach(async (p) => {
