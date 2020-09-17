@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-17 09:31:35
+ * @Last Modified time: 2020-09-17 10:00:52
  */
 // const _ = require('lodash');
 const inflect = require('i')();
@@ -55,26 +55,27 @@ ${property}
 }
 ${enumTxt}
 
+# ${tableItem.comment} 分页查询返回
 type ${inflect.camelize(tableItem.name)}List {
   count: Int!
   list: [${inflect.camelize(tableItem.name)}]
 }
 
 extend type Query {
-  # 分页查询
+  # ${tableItem.comment} 分页查询
   ${inflect.camelize(tableItem.name, false)}List(param: QueryListParam): ${inflect.camelize(tableItem.name)}List
-  # id 获取
+  # ${tableItem.comment}  id 获取
   ${inflect.camelize(tableItem.name, false)}(id: ID!): ${inflect.camelize(tableItem.name)}
-  # 有条件返回
+  # ${tableItem.comment} 有条件返回
   ${inflect.camelize(tableItem.name, false)}All(param: QueryListParam): [${inflect.camelize(tableItem.name)}]
 }
 
 extend type Mutation {
-  # 新增 or 修改
+  # ${tableItem.comment} 新增 or 修改
   ${inflect.camelize(tableItem.name, false)}(param: ${inflect.camelize(tableItem.name)}SaveIn!): String
-  # 批量 新增 or 修改
+  # ${tableItem.comment} 批量 新增 or 修改
   ${inflect.camelize(tableItem.name, false)}Bulk(param: [${inflect.camelize(tableItem.name)}SaveIn]!): String
-  # 删除
+  # ${tableItem.comment} 删除
   ${inflect.camelize(tableItem.name, false)}Destroy(where: JSONObject!, limit: Int): String
 }
 
