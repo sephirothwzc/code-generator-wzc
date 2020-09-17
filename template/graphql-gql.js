@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-17 18:32:50
+ * @Last Modified time: 2020-09-17 20:20:57
  */
 // const _ = require('lodash');
 const inflect = require('i')();
@@ -22,7 +22,7 @@ const findTypeTxt = (columnRow) => {
     case 'double':
       return `Float`;
     case 'datetime':
-      return `Date`;
+      return `String`;
     case 'boolean':
     case 'tinyint':
       return 'Boolean';
