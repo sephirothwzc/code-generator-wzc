@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-17 19:14:43
+ * @Last Modified time: 2020-09-17 19:33:13
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -166,7 +166,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
   return keyColumnList
     .map((p) => {
       if (p.TABLE_NAME === tableItem.name) {
-        txtImport.add(`import { ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model } from './${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}.model';`);
+        txtImport.add(`import { ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model } from './${p.REFERENCED_TABLE_NAME.replace(/_/g, '-')}.model';`);
         importBelongsTo = true;
         // 子表 外键 BelongsTo
         return `
@@ -174,7 +174,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
   ${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}: ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model;
 `;
       } else {
-        txtImport.add(`import { ${inflect.camelize(p.TABLE_NAME)}Model } from './${inflect.camelize(p.TABLE_NAME, false)}.model';`);
+        txtImport.add(`import { ${inflect.camelize(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
         importHasMany = true;
         // 主表 主键 Hasmany
         return `
