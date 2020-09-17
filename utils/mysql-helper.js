@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 23:05:41
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-16 18:12:01
+ * @Last Modified time: 2020-09-17 14:37:35
  */
 const mysql = require('mysql');
 
@@ -53,7 +53,8 @@ class MySqlHelper {
        AND R.REFERENCED_TABLE_NAME = C.REFERENCED_TABLE_NAME
       WHERE C.REFERENCED_TABLE_NAME IS NOT NULL 
 				AND C.REFERENCED_TABLE_NAME = '${tableName}' or C.TABLE_NAME = '${tableName}'
-        AND C.TABLE_SCHEMA = '${this.connString.database}'`;
+        AND C.TABLE_SCHEMA = '${this.connString.database}'
+        group by TABLE_SCHEMA`;
   }
 
   async query(sql) {

@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-16 18:18:46
+ * @Last Modified time: 2020-09-17 18:57:34
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -10,6 +10,7 @@ const inflect = require('i')();
 let importHasMany = false;
 let importBelongsTo = false;
 let importForeignKey = false;
+let txtImport = [];
 
 const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'created_id', 'updated_id', 'deleted_id', 'code', 'i18n'];
 
@@ -156,7 +157,7 @@ const findProperty = (typeString, enumTypeName, sequelizeType, columnRow, keyCol
 };
 
 /**
- * 根据key生成主外建对象
+ * 根据key生成主外建对象 增加 import
  * @param {*} typeString
  * @param {*} enumTypeName
  * @param {*} sequelizeType
@@ -166,12 +167,13 @@ const findForeignKey = (tableItem, keyColumnList) => {
   // @Field({ description: '编码', nullable: true })
   return keyColumnList
     .map((p) => {
+      txtImport.push(`import { ${inflect.camelize(p.TABLE_NAME)}Model } from '../lib/models/${inflect.camelize(p.TABLE_NAME, false)}.model';`);
       if (p.TABLE_NAME === tableItem.name) {
         importBelongsTo = true;
         // 子表 外键 BelongsTo
         return `
   @BelongsTo(() => ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model)
-  ${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}:  ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model;
+  ${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}: ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model;
 `;
       } else {
         importHasMany = true;
@@ -190,6 +192,8 @@ const modelTemplate = (propertyTxt, enumTxt, registerEnumType, constTxt, tableIt
   return `import { Table, Column, DataType${importSequelizeTypescript} } from 'sequelize-typescript';
 import { BaseModel } from '../base/model.base';
 import { providerWrapper } from 'midway';
+${txtImport.join(`
+`)}
 
 // #region enum${enumTxt}
 ${registerEnumType}
@@ -228,6 +232,7 @@ providerWrapper([
  * @param {*} tableItem
  */
 const findSequelizeModel = async (columnList, tableItem, keyColumnList) => {
+  txtImport = [];
   importHasMany = false;
   importBelongsTo = false;
   importForeignKey = false;
