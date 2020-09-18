@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-18 10:19:12
+ * @Last Modified time: 2020-09-18 10:30:48
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -140,10 +140,10 @@ ${ee}
  */
 const findProperty = (typeString, enumTypeName, sequelizeType, columnRow, keyColumnList, tableItem) => {
   const nullable = columnRow.IS_NULLABLE === 'YES' ? '?' : '';
-  console.log(keyColumnList);
-  console.log(`tableItem.name:${tableItem.name},columnRow.COLUMN_NAME:${columnRow.COLUMN_NAME}`);
+  // console.log(keyColumnList);
+  // console.log(`tableItem.name:${tableItem.name},columnRow.COLUMN_NAME:${columnRow.COLUMN_NAME}`);
   const foreignKey = keyColumnList.find((p) => p.TABLE_NAME === tableItem.name && p.COLUMN_NAME === columnRow.COLUMN_NAME);
-  console.log(foreignKey);
+  // console.log(foreignKey);
   const foreignKeyTxt = foreignKey
     ? `
   @ForeignKey(() => ${inflect.camelize(foreignKey.REFERENCED_TABLE_NAME)}Model)`
