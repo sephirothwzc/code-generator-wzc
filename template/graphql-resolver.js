@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-09-16 18:36:37
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-18 10:25:40
+ * @Last Modified time: 2020-09-18 11:42:37
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -29,7 +29,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
       // 子表 外键 BelongsTo 1 v 1
       return `    ${inflect.camelize(p.COLUMN_NAME, false)}Obj: async (_root, _args, ctx, _info) => {
       const service = await getService(ctx,'${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}');
-      return service.findByPk(_root.${inflect.camelize(p.COLUMN_NAME, false)});
+      return service.fetchById(_root.${inflect.camelize(p.COLUMN_NAME, false)});
     },`;
     } else {
       // 主表 主键 Hasmany 1 v N
