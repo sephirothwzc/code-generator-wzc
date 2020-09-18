@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-09-16 18:36:37
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-17 16:55:27
+ * @Last Modified time: 2020-09-18 10:25:40
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -24,26 +24,26 @@ const inflect = require('i')();
 
 const findForeignKey = (tableItem, keyColumnList) => {
   // @Field({ description: '编码', nullable: true })
-  return keyColumnList.map((p) => {
+  const property = keyColumnList.map((p) => {
     if (p.TABLE_NAME === tableItem.name) {
       // 子表 外键 BelongsTo 1 v 1
-      return `  ${inflect.camelize(tableItem.name)}: {
-    ${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}: async (_root, _args, ctx, _info) => {
+      return `    ${inflect.camelize(p.COLUMN_NAME, false)}Obj: async (_root, _args, ctx, _info) => {
       const service = await getService(ctx,'${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}');
       return service.findByPk(_root.${inflect.camelize(p.COLUMN_NAME, false)});
-    },
-  },`;
+    },`;
     } else {
       // 主表 主键 Hasmany 1 v N
-      return `  ${inflect.camelize(tableItem.name)}: {
-    ${inflect.camelize(p.TABLE_NAME, false)}: async (_root, _args, ctx, _info) => {
+      return `    ${inflect.camelize(p.TABLE_NAME, false)}: async (_root, _args, ctx, _info) => {
       const service = await getService(ctx, '${inflect.camelize(p.TABLE_NAME, false)}');
       return service.findAll({ where: { ${inflect.camelize(p.COLUMN_NAME, false)}: _root.id } });
-    },
-  },`;
+    },`;
     }
   }).join(`
 `);
+  const template = `  ${inflect.camelize(tableItem.name)}: {
+${property}
+  },`;
+  return template;
 };
 
 const modelTemplate = (tableItem, keyColumnList) => {

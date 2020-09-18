@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-17 20:20:57
+ * @Last Modified time: 2020-09-18 10:21:31
  */
 // const _ = require('lodash');
 const inflect = require('i')();
@@ -97,7 +97,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
       if (p.TABLE_NAME === tableItem.name) {
         // 子表 外键 BelongsTo 1 v 1
         return `
-  ${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}: ${inflect.camelize(p.REFERENCED_TABLE_NAME)}`;
+  ${inflect.camelize(p.COLUMN_NAME, false)}Obj: ${inflect.camelize(p.REFERENCED_TABLE_NAME)}`;
       } else {
         // 主表 主键 Hasmany 1 v N
         return `

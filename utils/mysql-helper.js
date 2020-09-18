@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 23:05:41
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-17 14:37:35
+ * @Last Modified time: 2020-09-18 10:17:21
  */
 const mysql = require('mysql');
 
@@ -54,7 +54,7 @@ class MySqlHelper {
       WHERE C.REFERENCED_TABLE_NAME IS NOT NULL 
 				AND C.REFERENCED_TABLE_NAME = '${tableName}' or C.TABLE_NAME = '${tableName}'
         AND C.TABLE_SCHEMA = '${this.connString.database}'
-        group by TABLE_SCHEMA`;
+        group by CONSTRAINT_NAME`;
   }
 
   async query(sql) {

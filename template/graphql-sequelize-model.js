@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-17 19:33:13
+ * @Last Modified time: 2020-09-18 10:19:12
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -140,7 +140,10 @@ ${ee}
  */
 const findProperty = (typeString, enumTypeName, sequelizeType, columnRow, keyColumnList, tableItem) => {
   const nullable = columnRow.IS_NULLABLE === 'YES' ? '?' : '';
+  console.log(keyColumnList);
+  console.log(`tableItem.name:${tableItem.name},columnRow.COLUMN_NAME:${columnRow.COLUMN_NAME}`);
   const foreignKey = keyColumnList.find((p) => p.TABLE_NAME === tableItem.name && p.COLUMN_NAME === columnRow.COLUMN_NAME);
+  console.log(foreignKey);
   const foreignKeyTxt = foreignKey
     ? `
   @ForeignKey(() => ${inflect.camelize(foreignKey.REFERENCED_TABLE_NAME)}Model)`
@@ -170,15 +173,15 @@ const findForeignKey = (tableItem, keyColumnList) => {
         importBelongsTo = true;
         // 子表 外键 BelongsTo
         return `
-  @BelongsTo(() => ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model)
-  ${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}: ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model;
+  @BelongsTo(() => ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model, '${p.COLUMN_NAME}')
+  ${inflect.camelize(p.COLUMN_NAME, false)}Obj: ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model;
 `;
       } else {
         txtImport.add(`import { ${inflect.camelize(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
         importHasMany = true;
         // 主表 主键 Hasmany
         return `
-  @HasMany(() => ${inflect.camelize(p.TABLE_NAME)}Model)
+  @HasMany(() => ${inflect.camelize(p.TABLE_NAME)}Model, '${p.COLUMN_NAME}')
   ${inflect.camelize(p.TABLE_NAME, false)}: Array<${inflect.camelize(p.TABLE_NAME)}Model>;
 `;
       }
