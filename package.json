@@ -1,6 +1,6 @@
 {
   "name": "code-generator-wzc",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "description": "代码生成器 for zhanchao.wu",
   "main": "index.js",
   "repository": {

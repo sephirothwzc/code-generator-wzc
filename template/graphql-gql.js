@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-18 10:21:31
+ * @Last Modified time: 2020-09-21 17:13:46
  */
 // const _ = require('lodash');
 const inflect = require('i')();
@@ -75,9 +75,9 @@ extend type Query {
 
 extend type Mutation {
   # ${tableItem.comment} 新增 or 修改
-  ${inflect.camelize(tableItem.name, false)}(param: ${inflect.camelize(tableItem.name)}SaveIn!): String
+  ${inflect.camelize(tableItem.name, false)}(param: ${inflect.camelize(tableItem.name)}SaveIn!, must: Boolean = false): String
   # ${tableItem.comment} 批量 新增 or 修改
-  ${inflect.camelize(tableItem.name, false)}Bulk(param: [${inflect.camelize(tableItem.name)}SaveIn]!): String
+  ${inflect.camelize(tableItem.name, false)}Bulk(param: [${inflect.camelize(tableItem.name)}SaveIn]!): [JSONObject]
   # ${tableItem.comment} 删除
   ${inflect.camelize(tableItem.name, false)}Destroy(where: JSONObject!, limit: Int): String
 }
