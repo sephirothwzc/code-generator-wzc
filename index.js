@@ -3,7 +3,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-17 09:51:21
+ * @Last Modified time: 2020-09-28 15:13:32
  */
 const path = require('path');
 const inquirer = require('inquirer');
@@ -29,6 +29,8 @@ const findgraphql = require('./template/graphql-gql');
 
 const findresolver = require('./template/graphql-resolver');
 
+const findschema = require('./template/graphql-schema');
+
 const fs = require('fs');
 const { promisify } = require('util');
 
@@ -37,6 +39,7 @@ const modelFunction = {
   findservice,
   findgraphql,
   findresolver,
+  findschema,
   // findmodel,
   // findinput,
   // findargs,
@@ -44,7 +47,7 @@ const modelFunction = {
 };
 
 // const codeTypeArray = ['SequelizeModel', 'service', 'graphql', 'model', 'args', 'input', 'order'];
-const codeTypeArray = ['SequelizeModel', 'service', 'graphql', 'resolver'];
+const codeTypeArray = ['SequelizeModel', 'graphql', 'schema', 'resolver', 'service'];
 /**
  * 初始化
  */
@@ -119,6 +122,7 @@ const filePathObj = {
   service: './src/service',
   graphql: './src/app/graphql',
   resolver: './src/app/graphql',
+  schema: './src/lib/schema',
 };
 /**
  * 创建文件
