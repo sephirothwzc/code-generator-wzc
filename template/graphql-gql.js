@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-17 16:35:39
+ * @Last Modified time: 2020-10-17 17:57:09
  */
 // const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -22,7 +22,7 @@ const findTypeTxt = (columnRow) => {
     case 'double':
       return `Float`;
     case 'datetime':
-      return `String`;
+      return `DateTime`;
     case 'boolean':
     case 'tinyint':
       return 'Boolean';
