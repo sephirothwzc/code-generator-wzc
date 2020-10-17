@@ -5,7 +5,7 @@
  * @Last Modified time: 2020-10-17 13:55:52
  */
 const _ = require('lodash');
-const inflect = require('i')();
+const pascalName = require('../utils/name-case');
 
 const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'code', 'i18n'];
 
@@ -79,7 +79,7 @@ const findProperty = (typeString, enumTypeName, gqlType, columnRow) => {
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */
   @Field(${gqlTypeTxt}{ description: '${columnRow.COLUMN_COMMENT}', nullable: true })
-  ${inflect.camelize(columnRow.COLUMN_NAME, false)}?: ${enumTypeName || typeString};
+  ${pascalName(columnRow.COLUMN_NAME, false)}?: ${enumTypeName || typeString};
 `;
 };
 
@@ -89,7 +89,7 @@ import { BaseArgs } from 'src/base/base.args';
 // import GraphQLJSON from 'graphql-type-json';
 
 @ArgsType()
-export class ${inflect.camelize(tableItem.name)}Args extends BaseArgs {
+export class ${pascalName(tableItem.name)}Args extends BaseArgs {
 ${propertyTxt}
 }
 `;

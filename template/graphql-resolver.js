@@ -2,10 +2,10 @@
  * @Author: zhanchao.wu
  * @Date: 2020-09-16 18:36:37
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-17 14:05:17
+ * @Last Modified time: 2020-10-17 16:35:50
  */
 const _ = require('lodash');
-const inflect = require('i')();
+const pascalName = require('../utils/name-case');
 
 /**
  * 
@@ -27,20 +27,21 @@ const findForeignKey = (tableItem, keyColumnList) => {
   const property = keyColumnList.map((p) => {
     if (p.TABLE_NAME === tableItem.name) {
       // 子表 外键 BelongsTo 1 v 1
-      return `    ${inflect.camelize(p.COLUMN_NAME, false)}Obj: async (_root, _args, ctx, _info) => {
-      const service = await getService(ctx,'${inflect.camelize(p.REFERENCED_TABLE_NAME, false)}');
-      return service.fetchById(_root.${inflect.camelize(p.COLUMN_NAME, false)});
+      return `    ${pascalName(p.COLUMN_NAME, false)}Obj: async (_root, _args, ctx, _info) => {
+      const service = await getService(ctx,'${pascalName(p.REFERENCED_TABLE_NAME, false)}');
+      return service.fetchById(_root.${pascalName(p.COLUMN_NAME, false)});
     },`;
     } else {
       // 主表 主键 Hasmany 1 v N
-      return `    ${inflect.camelize(p.TABLE_NAME, false)}${inflect.camelize(p.COLUMN_NAME)}: async (_root, _args, ctx, _info) => {
-      const service = await getService(ctx, '${inflect.camelize(p.TABLE_NAME, false)}');
-      return service.findAll({ where: { ${inflect.camelize(p.COLUMN_NAME, false)}: _root.id } });
+      return `    ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: async (_root, _args, ctx, _info) => {
+      const service = await getService(ctx, '${pascalName(p.TABLE_NAME, false)}');
+      _.set(_args.param, 'where.${pascalName(p.COLUMN_NAME, false)}', _root.id);
+      return service.findAll(_args.param);
     },`;
     }
   }).join(`
 `);
-  const template = `  ${inflect.camelize(tableItem.name)}: {
+  const template = `  ${pascalName(tableItem.name)}: {
 ${property}
   },`;
   return template;
@@ -48,12 +49,16 @@ ${property}
 
 const modelTemplate = (tableItem, keyColumnList) => {
   let foreignKey = findForeignKey(tableItem, keyColumnList);
+  const imputlodash = foreignKey
+    ? `const _ = require('lodash');
+`
+    : '';
   foreignKey &&
     (foreignKey = `
 ${foreignKey}`);
   return `const resolverUtil = require('../utils/resolver.util');
 const { Query, Mutation, getService } = resolverUtil('${_.camelCase(tableItem.name)}');
-
+${imputlodash}
 module.exports = {
   Query,
   Mutation,${foreignKey}

@@ -2,10 +2,10 @@
  * @Author: zhanchao.wu
  * @Date: 2020-09-16 18:36:37
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-18 09:40:50
+ * @Last Modified time: 2020-10-17 14:21:04
  */
 const _ = require('lodash');
-const inflect = require('i')();
+const pascalName = require('../utils/name-case');
 
 /**
  * 
@@ -28,16 +28,16 @@ const findForeignKey = (tableItem, keyColumnList) => {
   const txtIf = keyColumnList
     .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
     .map((p) => {
-      return `!param.${inflect.camelize(p.TABLE_NAME, false)}`;
+      return `!param.${pascalName(p.TABLE_NAME, false)}`;
     })
     .join(` && `);
   const txtObj = keyColumnList
     .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
     .map((p) => {
-      txtImport.add(`import { ${inflect.camelize(p.TABLE_NAME)}Model } from '../lib/models/${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
-      return `param.${inflect.camelize(p.TABLE_NAME, false)} &&
-      param.${inflect.camelize(p.TABLE_NAME, false)}.length > 0 &&
-      include.push({ model: ${inflect.camelize(p.TABLE_NAME)}Model, as: '${inflect.camelize(p.TABLE_NAME, false)}' });`;
+      txtImport.add(`import { ${pascalName(p.TABLE_NAME)}Model } from '../lib/models/${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
+      return `param.${pascalName(p.TABLE_NAME, false)} &&
+      param.${pascalName(p.TABLE_NAME, false)}.length > 0 &&
+      include.push({ model: ${pascalName(p.TABLE_NAME)}Model, as: '${pascalName(p.TABLE_NAME, false)}' });`;
     }).join(`
     `);
   if (!txtIf) {
@@ -62,20 +62,20 @@ const modelTemplate = (tableItem, keyColumnList) => {
   const { createOptions, txtImport } = findForeignKey(tableItem, keyColumnList);
   return `import { provide, inject } from 'midway';
 import { ServiceBase } from '../lib/base/service.base';
-import { I${inflect.camelize(tableItem.name)}Model } from '../lib/models/${tableItem.name.replace(/_/g, '-')}.model';
+import { I${pascalName(tableItem.name)}Model } from '../lib/models/${tableItem.name.replace(/_/g, '-')}.model';
 ${Array.from(txtImport).join(`
 `)}
 
-export interface I${inflect.camelize(tableItem.name)}Service extends ${inflect.camelize(tableItem.name)}Service {}
+export interface I${pascalName(tableItem.name)}Service extends ${pascalName(tableItem.name)}Service {}
 
 @provide()
-export class ${inflect.camelize(tableItem.name)}Service extends ServiceBase {
+export class ${pascalName(tableItem.name)}Service extends ServiceBase {
   get Model(): any {
     return this.${_.camelCase(tableItem.name)}Model;
   }
   
   @inject()
-  ${_.camelCase(tableItem.name)}Model: I${inflect.camelize(tableItem.name)}Model;
+  ${_.camelCase(tableItem.name)}Model: I${pascalName(tableItem.name)}Model;
   ${createOptions}
 }
 `;

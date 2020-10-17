@@ -2,10 +2,10 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-17 14:07:15
+ * @Last Modified time: 2020-10-17 14:20:47
  */
 const _ = require('lodash');
-const inflect = require('i')();
+const pascalName = require('../utils/name-case');
 // 是否添加引用
 let importHasMany = false;
 let importBelongsTo = false;
@@ -118,7 +118,7 @@ const findEnum = (columnRow) => {
       }
     })
     .join('');
-  const enumTypeName = inflect.camelize(columnRow.COLUMN_NAME);
+  const enumTypeName = pascalName(columnRow.COLUMN_NAME);
   const txt = `
 export enum E${enumTypeName} {
 ${ee}
@@ -146,14 +146,14 @@ const findProperty = (typeString, enumTypeName, sequelizeType, columnRow, keyCol
   // console.log(foreignKey);
   const foreignKeyTxt = foreignKey
     ? `
-  @ForeignKey(() => ${inflect.camelize(foreignKey.REFERENCED_TABLE_NAME)}Model)`
+  @ForeignKey(() => ${pascalName(foreignKey.REFERENCED_TABLE_NAME)}Model)`
     : '';
   // @Field({ description: '编码', nullable: true })
   return `  /**
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */${foreignKeyTxt}
   @Column({ comment: '${columnRow.COLUMN_COMMENT}', type: DataType.${sequelizeType} })
-  ${inflect.camelize(columnRow.COLUMN_NAME, false)}${nullable}: ${enumTypeName || typeString};
+  ${pascalName(columnRow.COLUMN_NAME, false)}${nullable}: ${enumTypeName || typeString};
 `;
 };
 
@@ -169,20 +169,20 @@ const findForeignKey = (tableItem, keyColumnList) => {
   return keyColumnList
     .map((p) => {
       if (p.TABLE_NAME === tableItem.name) {
-        txtImport.add(`import { ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model } from './${p.REFERENCED_TABLE_NAME.replace(/_/g, '-')}.model';`);
+        txtImport.add(`import { ${pascalName(p.REFERENCED_TABLE_NAME)}Model } from './${p.REFERENCED_TABLE_NAME.replace(/_/g, '-')}.model';`);
         importBelongsTo = true;
         // 子表 外键 BelongsTo
         return `
-  @BelongsTo(() => ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model, '${p.COLUMN_NAME}')
-  ${inflect.camelize(p.COLUMN_NAME, false)}Obj: ${inflect.camelize(p.REFERENCED_TABLE_NAME)}Model;
+  @BelongsTo(() => ${pascalName(p.REFERENCED_TABLE_NAME)}Model, '${p.COLUMN_NAME}')
+  ${pascalName(p.COLUMN_NAME, false)}Obj: ${pascalName(p.REFERENCED_TABLE_NAME)}Model;
 `;
       } else {
-        txtImport.add(`import { ${inflect.camelize(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
+        txtImport.add(`import { ${pascalName(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
         importHasMany = true;
         // 主表 主键 Hasmany
         return `
-  @HasMany(() => ${inflect.camelize(p.TABLE_NAME)}Model, '${p.COLUMN_NAME}')
-  ${inflect.camelize(p.TABLE_NAME, false)}${inflect.camelize(p.COLUMN_NAME)}: Array<${inflect.camelize(p.TABLE_NAME)}Model>;
+  @HasMany(() => ${pascalName(p.TABLE_NAME)}Model, '${p.COLUMN_NAME}')
+  ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: Array<${pascalName(p.TABLE_NAME)}Model>;
 `;
       }
     })
@@ -202,13 +202,13 @@ ${registerEnumType}
 // #endregion
 
 // 依赖注入 导出类型
-export type I${inflect.camelize(tableItem.name)}Model = typeof ${inflect.camelize(tableItem.name)}Model;
+export type I${pascalName(tableItem.name)}Model = typeof ${pascalName(tableItem.name)}Model;
 
 @Table({
   tableName: '${tableItem.name}',
   comment: '${tableItem.comment}',
 })
-export class ${inflect.camelize(tableItem.name)}Model extends BaseModel {
+export class ${pascalName(tableItem.name)}Model extends BaseModel {
 ${propertyTxt}${keyColums}
 }
 
@@ -218,7 +218,7 @@ ${constTxt}
 }
 
 // @provide 用 工厂模式static model
-export const factory = () => ${inflect.camelize(tableItem.name)}Model;
+export const factory = () => ${pascalName(tableItem.name)}Model;
 providerWrapper([
   {
     id: '${_.camelCase(tableItem.name)}Model',
