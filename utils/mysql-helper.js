@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 23:05:41
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-18 10:17:21
+ * @Last Modified time: 2020-10-17 17:47:30
  */
 const mysql = require('mysql');
 
@@ -52,7 +52,7 @@ class MySqlHelper {
        AND R.CONSTRAINT_NAME = C.CONSTRAINT_NAME
        AND R.REFERENCED_TABLE_NAME = C.REFERENCED_TABLE_NAME
       WHERE C.REFERENCED_TABLE_NAME IS NOT NULL 
-				AND C.REFERENCED_TABLE_NAME = '${tableName}' or C.TABLE_NAME = '${tableName}'
+				AND (C.REFERENCED_TABLE_NAME = '${tableName}' or C.TABLE_NAME = '${tableName})'
         AND C.TABLE_SCHEMA = '${this.connString.database}'
         group by CONSTRAINT_NAME`;
   }
