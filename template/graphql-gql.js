@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-21 17:13:46
+ * @Last Modified time: 2020-10-17 14:05:27
  */
 // const _ = require('lodash');
 const inflect = require('i')();
@@ -101,7 +101,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
       } else {
         // 主表 主键 Hasmany 1 v N
         return `
-  ${inflect.camelize(p.TABLE_NAME, false)}: [${inflect.camelize(p.TABLE_NAME)}]`;
+  ${inflect.camelize(p.TABLE_NAME, false)}${inflect.camelize(p.COLUMN_NAME)}: [${inflect.camelize(p.TABLE_NAME)}]`;
       }
     })
     .join('');

@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-09-16 18:36:37
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-18 11:42:37
+ * @Last Modified time: 2020-10-17 14:05:17
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -33,7 +33,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
     },`;
     } else {
       // 主表 主键 Hasmany 1 v N
-      return `    ${inflect.camelize(p.TABLE_NAME, false)}: async (_root, _args, ctx, _info) => {
+      return `    ${inflect.camelize(p.TABLE_NAME, false)}${inflect.camelize(p.COLUMN_NAME)}: async (_root, _args, ctx, _info) => {
       const service = await getService(ctx, '${inflect.camelize(p.TABLE_NAME, false)}');
       return service.findAll({ where: { ${inflect.camelize(p.COLUMN_NAME, false)}: _root.id } });
     },`;

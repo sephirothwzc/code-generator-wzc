@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-18 10:30:48
+ * @Last Modified time: 2020-10-17 14:07:15
  */
 const _ = require('lodash');
 const inflect = require('i')();
@@ -182,7 +182,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
         // 主表 主键 Hasmany
         return `
   @HasMany(() => ${inflect.camelize(p.TABLE_NAME)}Model, '${p.COLUMN_NAME}')
-  ${inflect.camelize(p.TABLE_NAME, false)}: Array<${inflect.camelize(p.TABLE_NAME)}Model>;
+  ${inflect.camelize(p.TABLE_NAME, false)}${inflect.camelize(p.COLUMN_NAME)}: Array<${inflect.camelize(p.TABLE_NAME)}Model>;
 `;
       }
     })
