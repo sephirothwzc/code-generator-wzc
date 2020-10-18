@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-09-16 18:36:37
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-17 14:21:04
+ * @Last Modified time: 2020-10-18 10:42:33
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -22,49 +22,47 @@ const pascalName = require('../utils/name-case');
   },
  */
 
-const findForeignKey = (tableItem, keyColumnList) => {
-  const txtImport = new Set();
-  // @Field({ description: '编码', nullable: true })
-  const txtIf = keyColumnList
-    .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
-    .map((p) => {
-      return `!param.${pascalName(p.TABLE_NAME, false)}`;
-    })
-    .join(` && `);
-  const txtObj = keyColumnList
-    .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
-    .map((p) => {
-      txtImport.add(`import { ${pascalName(p.TABLE_NAME)}Model } from '../lib/models/${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
-      return `param.${pascalName(p.TABLE_NAME, false)} &&
-      param.${pascalName(p.TABLE_NAME, false)}.length > 0 &&
-      include.push({ model: ${pascalName(p.TABLE_NAME)}Model, as: '${pascalName(p.TABLE_NAME, false)}' });`;
-    }).join(`
-    `);
-  if (!txtIf) {
-    // 为空不生成
-    return { createOptions: '', txtImport };
-  }
-  const createOptions = `
-  createOptions(
-    param: any
-  ): { include?: [any]; transaction?: any; validate?: boolean } {
-    if (${txtIf}) {
-      return {};
-    }
-    const include: any = [];
-    ${txtObj}
-    return { include };
-  }`;
-  return { createOptions, txtImport };
-};
+// const findForeignKey = (tableItem, keyColumnList) => {
+//   const txtImport = new Set();
+//   // @Field({ description: '编码', nullable: true })
+//   const txtIf = keyColumnList
+//     .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
+//     .map((p) => {
+//       return `!param.${pascalName(p.TABLE_NAME, false)}`;
+//     })
+//     .join(` && `);
+//   const txtObj = keyColumnList
+//     .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
+//     .map((p) => {
+//       txtImport.add(`import { ${pascalName(p.TABLE_NAME)}Model } from '../lib/models/${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
+//       return `param.${pascalName(p.TABLE_NAME, false)} &&
+//       param.${pascalName(p.TABLE_NAME, false)}.length > 0 &&
+//       include.push({ model: ${pascalName(p.TABLE_NAME)}Model, as: '${pascalName(p.TABLE_NAME, false)}' });`;
+//     }).join(`
+//     `);
+//   if (!txtIf) {
+//     // 为空不生成
+//     return { createOptions: '', txtImport };
+//   }
+//   const createOptions = `
+//   createOptions(
+//     param: any
+//   ): { include?: [any]; transaction?: any; validate?: boolean } {
+//     if (${txtIf}) {
+//       return {};
+//     }
+//     const include: any = [];
+//     ${txtObj}
+//     return { include };
+//   }`;
+//   return { createOptions, txtImport };
+// };
 
-const modelTemplate = (tableItem, keyColumnList) => {
-  const { createOptions, txtImport } = findForeignKey(tableItem, keyColumnList);
+const modelTemplate = (tableItem) => {
+  // const { createOptions, txtImport } = findForeignKey(tableItem, keyColumnList);
   return `import { provide, inject } from 'midway';
 import { ServiceBase } from '../lib/base/service.base';
 import { I${pascalName(tableItem.name)}Model } from '../lib/models/${tableItem.name.replace(/_/g, '-')}.model';
-${Array.from(txtImport).join(`
-`)}
 
 export interface I${pascalName(tableItem.name)}Service extends ${pascalName(tableItem.name)}Service {}
 
@@ -76,7 +74,6 @@ export class ${pascalName(tableItem.name)}Service extends ServiceBase {
   
   @inject()
   ${_.camelCase(tableItem.name)}Model: I${pascalName(tableItem.name)}Model;
-  ${createOptions}
 }
 `;
 };

@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-17 14:20:47
+ * @Last Modified time: 2020-10-18 10:49:36
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -189,14 +189,52 @@ const findForeignKey = (tableItem, keyColumnList) => {
     .join('');
 };
 
-const modelTemplate = (propertyTxt, enumTxt, registerEnumType, constTxt, tableItem, keyColums) => {
+const findOptions = (tableItem, keyColumnList) => {
+  const txtImport = new Set();
+  // @Field({ description: '编码', nullable: true })
+  const txtIf = keyColumnList
+    .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
+    .map((p) => {
+      return `!param.${pascalName(p.TABLE_NAME, false)}`;
+    })
+    .join(` && `);
+  const txtObj = keyColumnList
+    .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
+    .map((p) => {
+      txtImport.add(`import { ${pascalName(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
+      return `param.${pascalName(p.TABLE_NAME, false)} &&
+      param.${pascalName(p.TABLE_NAME, false)}.length > 0 &&
+      include.push({ model: ${pascalName(p.TABLE_NAME)}Model, as: '${pascalName(p.TABLE_NAME, false)}' });`;
+    }).join(`
+    `);
+  if (!txtIf) {
+    // 为空不生成
+    return { createOptions: '', optionsImport: txtImport };
+  }
+  const createOptions = `
+  createOptions(
+    param: any
+  ): { include?: [any]; transaction?: any; validate?: boolean } {
+    if (${txtIf}) {
+      return {};
+    }
+    const include: any = [];
+    ${txtObj}
+    return { include };
+  }`;
+  return { createOptions, optionsImport: txtImport };
+};
+
+const modelTemplate = (propertyTxt, enumTxt, registerEnumType, constTxt, tableItem, keyColums, keyColumnList) => {
+  const { createOptions, optionsImport } = findOptions(tableItem, keyColumnList);
   const importSequelizeTypescript = `${importBelongsTo ? ', BelongsTo, ForeignKey' : ''}${importHasMany ? ', HasMany' : ''}`;
   return `import { Table, Column, DataType${importSequelizeTypescript} } from 'sequelize-typescript';
 import { BaseModel } from '../base/model.base';
 import { providerWrapper } from 'midway';
 ${Array.from(txtImport).join(`
 `)}
-
+${Array.from(optionsImport).join(`
+`)}
 // #region enum${enumTxt}
 ${registerEnumType}
 // #endregion
@@ -210,6 +248,7 @@ export type I${pascalName(tableItem.name)}Model = typeof ${pascalName(tableItem.
 })
 export class ${pascalName(tableItem.name)}Model extends BaseModel {
 ${propertyTxt}${keyColums}
+${createOptions}
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
@@ -260,7 +299,7 @@ const findSequelizeModel = async (columnList, tableItem, keyColumnList) => {
   static readonly ${_.toUpper(p.COLUMN_NAME)}: string = '${_.camelCase(p.COLUMN_NAME)}';
 `;
     });
-  return modelTemplate(propertyTxt, enumTxt, registerEnumType, constTxt, tableItem, keyColums);
+  return modelTemplate(propertyTxt, enumTxt, registerEnumType, constTxt, tableItem, keyColums, keyColumnList);
 };
 
 module.exports = findSequelizeModel;
