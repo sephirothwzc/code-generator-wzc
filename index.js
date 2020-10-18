@@ -3,7 +3,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-28 15:13:32
+ * @Last Modified time: 2020-10-18 12:08:41
  */
 const path = require('path');
 const inquirer = require('inquirer');
@@ -31,6 +31,8 @@ const findresolver = require('./template/graphql-resolver');
 
 const findschema = require('./template/graphql-schema');
 
+const findhelper = require('./template/graphql-helper');
+
 const fs = require('fs');
 const { promisify } = require('util');
 
@@ -40,6 +42,7 @@ const modelFunction = {
   findgraphql,
   findresolver,
   findschema,
+  findhelper,
   // findmodel,
   // findinput,
   // findargs,
@@ -47,7 +50,7 @@ const modelFunction = {
 };
 
 // const codeTypeArray = ['SequelizeModel', 'service', 'graphql', 'model', 'args', 'input', 'order'];
-const codeTypeArray = ['SequelizeModel', 'graphql', 'schema', 'resolver', 'service'];
+const codeTypeArray = ['SequelizeModel', 'graphql', 'schema', 'resolver', 'service', 'helper'];
 /**
  * 初始化
  */
@@ -123,6 +126,7 @@ const filePathObj = {
   graphql: './src/app/graphql',
   resolver: './src/app/graphql',
   schema: './src/lib/schema',
+  helper: './packages/helper-api/src/lib/model',
 };
 /**
  * 创建文件
@@ -140,7 +144,11 @@ const createFile = async (filename, txt, type) => {
     });
   }
   // 文件名后缀
-  const suffix = type !== 'SequelizeModel' ? type : 'model';
+  let suffix = type;
+  if (['SequelizeModel', 'helper'].includes(type)) {
+    suffix = 'model';
+  }
+  // const suffix = type !== 'SequelizeModel' ? type : 'model';
   shell.mkdir('-p', filePath);
   return new Promise((resolve, reject) => {
     fs.writeFile(`${filePath}/${filename}.${suffix}.ts`, txt, (error) => {
