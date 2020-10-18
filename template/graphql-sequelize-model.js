@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-18 10:57:36
+ * @Last Modified time: 2020-10-18 11:28:09
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -74,7 +74,7 @@ const findSequelizeType = (element) => {
  * comment [info 1 初始化,close 0 关闭] or [info 初始化,close 关闭]or [info,close]
  * @param {*} columnRow 行
  */
-const findEnum = (columnRow) => {
+const findEnum = (tableName, columnRow) => {
   let value;
   if (!columnRow.COLUMN_COMMENT && columnRow.DATA_TYPE !== 'enum') {
     return undefined;
@@ -120,13 +120,13 @@ const findEnum = (columnRow) => {
     .join('');
   const enumTypeName = pascalName(columnRow.COLUMN_NAME);
   const txt = `
-export enum E${enumTypeName} {
+export enum E${pascalName(tableName)}${enumTypeName} {
 ${ee}
 }
 `;
 
   return {
-    enumTypeName: `E${enumTypeName}`,
+    enumTypeName: `E${pascalName(tableName)}${enumTypeName}`,
     txt,
   };
 };
@@ -285,7 +285,7 @@ const findSequelizeModel = async (columnList, tableItem, keyColumnList) => {
       // columnList.forEach(p => {
       keyColums = findForeignKey(tableItem, keyColumnList);
       const typeString = findTypeTxt(p);
-      const colEnum = findEnum(p);
+      const colEnum = findEnum(tableItem.name, p);
       enumTxt += _.get(colEnum, 'txt', '');
       registerEnumType += _.get(colEnum, 'registerEnumType', '');
       const sequelizeType = findSequelizeType(p);

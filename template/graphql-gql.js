@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-17 17:57:09
+ * @Last Modified time: 2020-10-18 11:29:13
  */
 // const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -10,7 +10,7 @@ const pascalName = require('../utils/name-case');
 const notColumn = ['id'];
 let enumTxt = '';
 
-const findTypeTxt = (columnRow) => {
+const findTypeTxt = (tableName, columnRow) => {
   switch (columnRow.DATA_TYPE) {
     case 'bigint':
     case 'nvarchar':
@@ -30,8 +30,8 @@ const findTypeTxt = (columnRow) => {
       return 'JSONObject';
     case 'enum':
       enumTxt += `
-enum E${pascalName(columnRow.COLUMN_NAME, true)}${columnRow.COLUMN_TYPE.replace('enum', '').replace(/\(/g, '{').replace(/\)/g, '}').replace(/[']/g, '')}`;
-      return `E${pascalName(columnRow.COLUMN_NAME, true)}`;
+enum E${pascalName(tableName)}${pascalName(columnRow.COLUMN_NAME, true)}${columnRow.COLUMN_TYPE.replace('enum', '').replace(/\(/g, '{').replace(/\)/g, '}').replace(/[']/g, '')}`;
+      return `E${pascalName(tableName)}${pascalName(columnRow.COLUMN_NAME, true)}`;
     default:
       return 'String';
   }
@@ -45,7 +45,7 @@ const findType = (columnList, tableItem, keyColumnList) => {
         ? `  # ${col.COLUMN_COMMENT}
   `
         : '  ';
-      return `${comment}${pascalName(col.COLUMN_NAME, false)}: ${findTypeTxt(col)}`;
+      return `${comment}${pascalName(col.COLUMN_NAME, false)}: ${findTypeTxt(tableItem.name, col)}`;
     }).join(`
 `);
   // 主外键对象
