@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-18 10:49:36
+ * @Last Modified time: 2020-10-18 10:57:36
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -226,14 +226,12 @@ const findOptions = (tableItem, keyColumnList) => {
 };
 
 const modelTemplate = (propertyTxt, enumTxt, registerEnumType, constTxt, tableItem, keyColums, keyColumnList) => {
-  const { createOptions, optionsImport } = findOptions(tableItem, keyColumnList);
+  const { createOptions } = findOptions(tableItem, keyColumnList);
   const importSequelizeTypescript = `${importBelongsTo ? ', BelongsTo, ForeignKey' : ''}${importHasMany ? ', HasMany' : ''}`;
   return `import { Table, Column, DataType${importSequelizeTypescript} } from 'sequelize-typescript';
 import { BaseModel } from '../base/model.base';
 import { providerWrapper } from 'midway';
 ${Array.from(txtImport).join(`
-`)}
-${Array.from(optionsImport).join(`
 `)}
 // #region enum${enumTxt}
 ${registerEnumType}
