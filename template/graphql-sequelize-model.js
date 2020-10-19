@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-19 13:58:06
+ * @Last Modified time: 2020-10-19 17:43:29
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -223,7 +223,14 @@ export const createOptions = () => {
     ${txtObj}
     return { include };
   };
-};`;
+};
+providerWrapper([
+  {
+    id: '${_.camelCase(tableItem.name)}Model.createOptions',
+    provider: createOptions,
+  },
+]);
+`;
   return { createOptions, optionsImport: txtImport };
 };
 
@@ -263,14 +270,7 @@ providerWrapper([
     provider: factory,
   },
 ]);
-
 ${createOptions}
-providerWrapper([
-  {
-    id: '${_.camelCase(tableItem.name)}Model.createOptions',
-    provider: createOptions,
-  },
-]);
 `;
 };
 
