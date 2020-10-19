@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-18 11:28:09
+ * @Last Modified time: 2020-10-19 13:58:06
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -195,16 +195,16 @@ const findOptions = (tableItem, keyColumnList) => {
   const txtIf = keyColumnList
     .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
     .map((p) => {
-      return `!param.${pascalName(p.TABLE_NAME, false)}`;
+      return `!param.${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}`;
     })
     .join(` && `);
   const txtObj = keyColumnList
     .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
     .map((p) => {
       txtImport.add(`import { ${pascalName(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
-      return `param.${pascalName(p.TABLE_NAME, false)} &&
-      param.${pascalName(p.TABLE_NAME, false)}.length > 0 &&
-      include.push({ model: ${pascalName(p.TABLE_NAME)}Model, as: '${pascalName(p.TABLE_NAME, false)}' });`;
+      return `param.${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)} &&
+      param.${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}.length > 0 &&
+      include.push({ model: ${pascalName(p.TABLE_NAME)}Model, as: '${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}' });`;
     }).join(`
     `);
   if (!txtIf) {
@@ -212,16 +212,18 @@ const findOptions = (tableItem, keyColumnList) => {
     return { createOptions: '', optionsImport: txtImport };
   }
   const createOptions = `
-  createOptions(
-    param: any
-  ): { include?: [any]; transaction?: any; validate?: boolean } {
+export const createOptions = () => {
+  return (
+    param: ${pascalName(tableItem.name)}Model
+  ): { include?: [any]; transaction?: any; validate?: boolean } => {
     if (${txtIf}) {
       return {};
     }
     const include: any = [];
     ${txtObj}
     return { include };
-  }`;
+  };
+};`;
   return { createOptions, optionsImport: txtImport };
 };
 
@@ -246,7 +248,6 @@ export type I${pascalName(tableItem.name)}Model = typeof ${pascalName(tableItem.
 })
 export class ${pascalName(tableItem.name)}Model extends BaseModel {
 ${propertyTxt}${keyColums}
-${createOptions}
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
@@ -260,6 +261,14 @@ providerWrapper([
   {
     id: '${_.camelCase(tableItem.name)}Model',
     provider: factory,
+  },
+]);
+
+${createOptions}
+providerWrapper([
+  {
+    id: '${_.camelCase(tableItem.name)}Model.createOptions',
+    provider: createOptions,
   },
 ]);
 `;

@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-18 14:41:04
+ * @Last Modified time: 2020-10-19 13:48:01
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -137,12 +137,10 @@ ${ee}
  * @param {*} columnRow
  */
 const findProperty = (typeString, enumTypeName, sequelizeType, columnRow) => {
-  const nullable = columnRow.IS_NULLABLE === 'YES' ? '?' : '';
-
   return `  /**
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */
-  ${pascalName(columnRow.COLUMN_NAME, false)}${nullable}: ${enumTypeName || typeString};
+  ${pascalName(columnRow.COLUMN_NAME, false)}: ${enumTypeName || typeString};
 `;
 };
 

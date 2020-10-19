@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-18 11:29:13
+ * @Last Modified time: 2020-10-19 15:57:23
  */
 // const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -115,7 +115,7 @@ const findForeignKeyInput = (tableItem, keyColumnList) => {
     .map((p) => {
       // 主表 主键 Hasmany 1 v N
       return `
-  ${pascalName(p.TABLE_NAME, false)}: [${pascalName(p.TABLE_NAME)}SaveIn]`;
+  ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: [${pascalName(p.TABLE_NAME)}SaveIn]`;
     })
     .join('');
 };
