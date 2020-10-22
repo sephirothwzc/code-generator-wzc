@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-19 17:43:29
+ * @Last Modified time: 2020-10-22 16:34:13
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -11,7 +11,7 @@ let importHasMany = false;
 let importBelongsTo = false;
 let txtImport = new Set();
 
-const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'created_id', 'updated_id', 'deleted_id', 'code', 'i18n'];
+const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'created_id', 'updated_id', 'deleted_id', 'i18n'];
 
 const findTypeTxt = (columnRow) => {
   switch (columnRow.DATA_TYPE) {
