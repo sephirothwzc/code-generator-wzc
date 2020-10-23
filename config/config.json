@@ -1,8 +1,8 @@
 {
-  "username": "xx",
-  "password": "xx@123",
-  "database": "xx",
-  "port": "xx",
-  "host": "xx",
+  "username": "root_wzc",
+  "password": "Admin@123",
+  "database": "integral_recycling_dev02",
+  "host": "rm-8vbmop542231l4wx7co.mysql.zhangbei.rds.aliyuncs.com",
+  "port": "43306",
   "dialect": "mysql"
 }
