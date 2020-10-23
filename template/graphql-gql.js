@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-23 10:52:33
+ * @Last Modified time: 2020-10-23 11:02:42
  */
 // const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -65,6 +65,8 @@ type ${pascalName(tableItem.name)}List {
 }
 
 extend type Query {
+  # ${tableItem.comment} 总行数
+  ${pascalName(tableItem.name, false)}Count(param: QueryListParam): Int
   # ${tableItem.comment} 分页查询
   ${pascalName(tableItem.name, false)}List(param: QueryListParam): ${pascalName(tableItem.name)}List
   # ${tableItem.comment}  id 获取
