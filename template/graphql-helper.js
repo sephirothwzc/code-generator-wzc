@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-19 13:48:01
+ * @Last Modified time: 2020-10-23 10:00:43
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -119,6 +119,7 @@ const findEnum = (tableName, columnRow) => {
   const enumTypeName = pascalName(columnRow.COLUMN_NAME);
   const txt = `
 export enum E${pascalName(tableName)}${enumTypeName} {
+  all = '',
 ${ee}
 }
 `;
