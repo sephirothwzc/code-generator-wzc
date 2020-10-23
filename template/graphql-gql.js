@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-19 15:57:23
+ * @Last Modified time: 2020-10-23 10:52:33
  */
 // const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -58,13 +58,19 @@ ${property}${foreignKey}
 }
 ${enumTxt}
 
+# ${tableItem.comment} 分页查询返回
+type ${pascalName(tableItem.name)}List {
+  count: Int!
+  list: [${pascalName(tableItem.name)}]
+}
+
 extend type Query {
   # ${tableItem.comment} 分页查询
-  ${pascalName(tableItem.name, false)}Count(param: QueryListParam): Int
+  ${pascalName(tableItem.name, false)}List(param: QueryListParam): ${pascalName(tableItem.name)}List
   # ${tableItem.comment}  id 获取
   ${pascalName(tableItem.name, false)}(id: ID!): ${pascalName(tableItem.name)}
   # ${tableItem.comment} 有条件返回
-  ${pascalName(tableItem.name, false)}List(param: QueryListParam): [${pascalName(tableItem.name)}]
+  ${pascalName(tableItem.name, false)}All(param: QueryListParam): [${pascalName(tableItem.name)}]
 }
 
 extend type Mutation {
