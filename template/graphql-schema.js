@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-17 14:21:25
+ * @Last Modified time: 2020-10-23 20:38:08
  */
 
 // const _ = require('lodash');
@@ -53,6 +53,7 @@ ${property}
 });
 
 export const ${pascalName(tableItem.name, false)}MutationUpdate = Joi.object().keys({
+id: Joi.string().allow(''),
 ${property}
 });
 
