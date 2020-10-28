@@ -2,14 +2,14 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-23 10:00:43
+ * @Last Modified time: 2020-10-28 17:21:24
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
 // 是否添加引用
 let txtImport = new Set();
 
-const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'created_id', 'updated_id', 'deleted_id', 'code', 'i18n'];
+const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'created_id', 'updated_id', 'deleted_id', 'code', 'i18n', 'business_code'];
 
 const findTypeTxt = (columnRow) => {
   switch (columnRow.DATA_TYPE) {
@@ -157,13 +157,13 @@ const findForeignKey = (tableItem, keyColumnList) => {
   return keyColumnList
     .map((p) => {
       if (p.TABLE_NAME === tableItem.name) {
-        txtImport.add(`import { ${pascalName(p.REFERENCED_TABLE_NAME)}Model } from './${p.REFERENCED_TABLE_NAME.replace(/_/g, '-')}.model';`);
+        p.REFERENCED_TABLE_NAME !== p.TABLE_NAME && txtImport.add(`import { ${pascalName(p.REFERENCED_TABLE_NAME)}Model } from './${p.REFERENCED_TABLE_NAME.replace(/_/g, '-')}.model';`);
         // 子表 外键 BelongsTo
         return `
   ${pascalName(p.COLUMN_NAME, false)}Obj: ${pascalName(p.REFERENCED_TABLE_NAME)}Model;
 `;
       } else {
-        txtImport.add(`import { ${pascalName(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
+        p.REFERENCED_TABLE_NAME !== p.TABLE_NAME && txtImport.add(`import { ${pascalName(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
         // 主表 主键 Hasmany
         return `
   ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: Array<${pascalName(p.TABLE_NAME)}Model>;

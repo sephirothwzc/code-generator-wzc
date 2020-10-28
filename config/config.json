@@ -1,8 +1,8 @@
 {
-  "username": "roxx",
-  "password": "Admixx",
-  "database": "integxxng_dev02",
-  "host": "rm-8vbmoxs.com",
-  "port": "43xx",
+  "username": "root_wzc",
+  "password": "Admin@123",
+  "database": "integral_recycling_dev02",
+  "port": "43306",
+  "host": "rm-8vbmop542231l4wx7co.mysql.zhangbei.rds.aliyuncs.com",
   "dialect": "mysql"
 }
