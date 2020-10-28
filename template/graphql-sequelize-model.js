@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-27 22:12:13
+ * @Last Modified time: 2020-10-28 21:41:47
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -256,8 +256,14 @@ ${registerEnumType}
 // #endregion
 
 // 依赖注入 导出类型
+/**
+ * ${tableItem.comment}
+ */
 export type I${pascalName(tableItem.name)}Model = typeof ${pascalName(tableItem.name)}Model;
 
+/**
+ * ${tableItem.comment}
+ */
 @Table({
   tableName: '${tableItem.name}',
   comment: '${tableItem.comment}',
