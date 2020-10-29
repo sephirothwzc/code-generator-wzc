@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-09-16 18:36:37
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-17 16:35:50
+ * @Last Modified time: 2020-10-29 21:00:09
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -35,7 +35,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
       // 主表 主键 Hasmany 1 v N
       return `    ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: async (_root, _args, ctx, _info) => {
       const service = await getService(ctx, '${pascalName(p.TABLE_NAME, false)}');
-      _.set(_args.param, 'where.${pascalName(p.COLUMN_NAME, false)}', _root.id);
+      _.set(_args, 'param.where.${pascalName(p.COLUMN_NAME, false)}', _root.id);
       return service.findAll(_args.param);
     },`;
     }
