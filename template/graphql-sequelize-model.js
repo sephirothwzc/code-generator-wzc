@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-28 21:41:47
+ * @Last Modified time: 2020-10-29 15:54:35
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');

@@ -2,12 +2,12 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-28 09:18:47
+ * @Last Modified time: 2020-10-29 15:54:20
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
 
-const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'code', 'i18n'];
+const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'i18n'];
 
 const findTypeTxt = (columnRow) => {
   switch (columnRow.DATA_TYPE) {
