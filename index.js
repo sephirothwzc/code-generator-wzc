@@ -3,7 +3,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 22:09:13
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-18 12:08:41
+ * @Last Modified time: 2020-10-31 14:57:35
  */
 const path = require('path');
 const inquirer = require('inquirer');
@@ -125,7 +125,7 @@ const filePathObj = {
   service: './src/service',
   graphql: './src/app/graphql',
   resolver: './src/app/graphql',
-  schema: './src/lib/schema',
+  schema: './src/lib/schemas',
   helper: './packages/helper-api/src/lib/model',
 };
 /**
