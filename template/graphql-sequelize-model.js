@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-29 15:54:35
+ * @Last Modified time: 2020-11-10 10:38:09
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -41,6 +41,8 @@ const findSequelizeType = (element) => {
     case 'nvarchar':
     case 'varchar':
       return `STRING(${element.CHARACTER_MAXIMUM_LENGTH})`;
+    case 'time':
+      return 'TIME';
     case 'datetime':
       return `DATE`;
     case 'timestamp':
