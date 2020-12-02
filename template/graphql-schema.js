@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-24 21:31:16
+ * @Last Modified time: 2020-12-02 19:16:23
  */
 
 // const _ = require('lodash');
@@ -15,7 +15,7 @@ const findTypeTxt = (columnRow) => {
     case 'bigint':
     case 'nvarchar':
     case 'varchar':
-      return `Joi.string().allow('')`;
+      return `Joi.string().allow('').allow(null)`;
     case 'timestamp':
     case 'int':
       return `Joi.number().integer()`;
@@ -28,11 +28,11 @@ const findTypeTxt = (columnRow) => {
     case 'tinyint':
       return 'Joi.boolean()';
     case 'json':
-      return `Joi.string().allow('')`;
+      return `Joi.string().allow('').allow(null)`;
     case 'enum':
-      return `Joi.string().allow('').valid${columnRow.COLUMN_TYPE.replace('enum', '')}`;
+      return `Joi.string().allow('').allow(null).valid${columnRow.COLUMN_TYPE.replace('enum', '')}`;
     default:
-      return `Joi.string().allow('')`;
+      return `Joi.string().allow('').allow(null)`;
   }
 };
 
