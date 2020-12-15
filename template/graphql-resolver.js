@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-09-16 18:36:37
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-12-15 14:27:15
+ * @Last Modified time: 2020-12-15 22:39:36
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -22,7 +22,7 @@ const pascalName = require('../utils/name-case');
   },
  */
 
-const findForeignKey = (tableItem, keyColumnList) => {
+const findForeignKey = (tableItem, keyColumnList, columnList) => {
   // @Field({ description: '编码', nullable: true })
   const property = keyColumnList.map((p) => {
     if (p.TABLE_NAME === tableItem.name) {
@@ -41,14 +41,15 @@ const findForeignKey = (tableItem, keyColumnList) => {
     }
   }).join(`
 `);
+  const objList = addObjByCommit(columnList);
   const template = `  ${pascalName(tableItem.name)}: {
-${property}
+${property}${objList}
   },`;
   return template;
 };
 
-const modelTemplate = (tableItem, keyColumnList) => {
-  let foreignKey = findForeignKey(tableItem, keyColumnList);
+const modelTemplate = (tableItem, keyColumnList, columnList) => {
+  let foreignKey = findForeignKey(tableItem, keyColumnList, columnList);
   const imputlodash = foreignKey
     ? `const _ = require('lodash');
 `
@@ -72,7 +73,7 @@ module.exports = {
  * @param {*} tableItem
  */
 const findresolver = async (columnList, tableItem, keyColumnList) => {
-  return modelTemplate(tableItem, keyColumnList);
+  return modelTemplate(tableItem, keyColumnList, columnList);
 };
 
 /**
@@ -85,8 +86,7 @@ const addObjByCommit = (columnList) => {
     .map((p) => {
       const value = p.COLUMN_COMMENT.match(/{(.+?)}/g);
       const txt = value[value.length - 1].replace('{', '').replace('}', '');
-      return `
-    /**
+      return `    /**
      * ${p.COLUMN_COMMENT}
      */
     ${pascalName(p.COLUMN_NAME, false)}Obj: async (_root, _args, ctx, _info) => {
@@ -95,10 +95,9 @@ const addObjByCommit = (columnList) => {
       }
       const service = await getService(ctx, '${pascalName(txt, false)}');
       return service.fetchById(_root.${pascalName(p.COLUMN_NAME, false)});
-    },
-`;
-    })
-    .join('');
+    },`;
+    }).join(`
+`);
   /**
    * RowDataPacket {
     TABLE_CATALOG: 'def',
