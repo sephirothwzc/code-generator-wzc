@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-23 11:02:42
+ * @Last Modified time: 2020-12-15 11:43:17
  */
 // const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -51,10 +51,13 @@ const findType = (columnList, tableItem, keyColumnList) => {
   // 主外键对象
   const foreignKey = findForeignKey(tableItem, keyColumnList) || '';
   const foreignKeyInput = findForeignKeyInput(tableItem, keyColumnList) || '';
+  // 自定义外键对象
+  const objList = addObjByCommit(columnList);
+
   const temp = `# ${tableItem.comment}
 type ${pascalName(tableItem.name)} {
   id: ID
-${property}${foreignKey}
+${property}${foreignKey}${objList}
 }
 ${enumTxt}
 
@@ -137,6 +140,53 @@ const findgraphql = (columnList, tableItem, keyColumnList) => {
   enumTxt = '';
   const modelType = findType(columnList, tableItem, keyColumnList);
   return modelType;
+};
+
+/**
+ * 根据每一列的备注判断 是否需要增加 obj {appUser}
+ * @param {*} columnList
+ */
+const addObjByCommit = (columnList) => {
+  const propertyString = columnList
+    .filter((p) => p.COLUMN_COMMENT.match(/{(.+?)}/g))
+    .map((p) => {
+      const value = p.COLUMN_COMMENT.match(/{(.+?)}/g);
+      const txt = value[value.length - 1].replace('{', '').replace('}', '');
+      return `  # ${p.COLUMN_COMMENT}
+  ${pascalName(p.COLUMN_NAME, false)}Obj: ${pascalName(txt)}`;
+    }).join(`
+`);
+  return (
+    propertyString &&
+    `
+${propertyString}`
+  );
+  /**
+   * RowDataPacket {
+    TABLE_CATALOG: 'def',
+    TABLE_SCHEMA: 'refined_platform_dev',
+    TABLE_NAME: 'app_user_details',
+    COLUMN_NAME: 'created_at',
+    ORDINAL_POSITION: 2,
+    COLUMN_DEFAULT: 'CURRENT_TIMESTAMP',
+    IS_NULLABLE: 'NO',
+    DATA_TYPE: 'datetime',
+    CHARACTER_MAXIMUM_LENGTH: null,
+    CHARACTER_OCTET_LENGTH: null,
+    NUMERIC_PRECISION: null,
+    NUMERIC_SCALE: null,
+    DATETIME_PRECISION: 0,
+    CHARACTER_SET_NAME: null,
+    COLLATION_NAME: null,
+    COLUMN_TYPE: 'datetime',
+    COLUMN_KEY: '',
+    EXTRA: 'DEFAULT_GENERATED',
+    PRIVILEGES: 'select,insert,update,references',
+    COLUMN_COMMENT: '创建时间',
+    GENERATION_EXPRESSION: '',
+    SRS_ID: null
+  }
+   */
 };
 
 module.exports = findgraphql;

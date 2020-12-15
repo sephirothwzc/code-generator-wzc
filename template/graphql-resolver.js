@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-09-16 18:36:37
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-29 21:00:09
+ * @Last Modified time: 2020-12-15 14:27:15
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -73,6 +73,58 @@ module.exports = {
  */
 const findresolver = async (columnList, tableItem, keyColumnList) => {
   return modelTemplate(tableItem, keyColumnList);
+};
+
+/**
+ * 根据每一列的备注判断 是否需要增加 obj {appUser}
+ * @param {*} columnList
+ */
+const addObjByCommit = (columnList) => {
+  return columnList
+    .filter((p) => p.COLUMN_COMMENT.match(/{(.+?)}/g))
+    .map((p) => {
+      const value = p.COLUMN_COMMENT.match(/{(.+?)}/g);
+      const txt = value[value.length - 1].replace('{', '').replace('}', '');
+      return `
+    /**
+     * ${p.COLUMN_COMMENT}
+     */
+    ${pascalName(p.COLUMN_NAME, false)}Obj: async (_root, _args, ctx, _info) => {
+      if (!_root || !_root.${pascalName(p.COLUMN_NAME, false)}) {
+        return null;
+      }
+      const service = await getService(ctx, '${pascalName(txt, false)}');
+      return service.fetchById(_root.${pascalName(p.COLUMN_NAME, false)});
+    },
+`;
+    })
+    .join('');
+  /**
+   * RowDataPacket {
+    TABLE_CATALOG: 'def',
+    TABLE_SCHEMA: 'refined_platform_dev',
+    TABLE_NAME: 'app_user_details',
+    COLUMN_NAME: 'created_at',
+    ORDINAL_POSITION: 2,
+    COLUMN_DEFAULT: 'CURRENT_TIMESTAMP',
+    IS_NULLABLE: 'NO',
+    DATA_TYPE: 'datetime',
+    CHARACTER_MAXIMUM_LENGTH: null,
+    CHARACTER_OCTET_LENGTH: null,
+    NUMERIC_PRECISION: null,
+    NUMERIC_SCALE: null,
+    DATETIME_PRECISION: 0,
+    CHARACTER_SET_NAME: null,
+    COLLATION_NAME: null,
+    COLUMN_TYPE: 'datetime',
+    COLUMN_KEY: '',
+    EXTRA: 'DEFAULT_GENERATED',
+    PRIVILEGES: 'select,insert,update,references',
+    COLUMN_COMMENT: '创建时间',
+    GENERATION_EXPRESSION: '',
+    SRS_ID: null
+  }
+   */
 };
 
 module.exports = findresolver;
