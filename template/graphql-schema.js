@@ -28,7 +28,7 @@ const findTypeTxt = (columnRow) => {
     case 'tinyint':
       return 'Joi.boolean()';
     case 'json':
-      return `Joi.string().allow('').allow(null)`;
+      return `Joi.object().allow(null)`;
     case 'enum':
       return `Joi.string().allow('').allow(null).valid${columnRow.COLUMN_TYPE.replace('enum', '')}`;
     default:
