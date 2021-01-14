@@ -23,7 +23,7 @@ const findTypeTxt = (columnRow) => {
     case 'double':
       return `Joi.number()`;
     case 'datetime':
-      return `Joi.date()`;
+      return `Joi.date().allow(null)`;
     case 'boolean':
     case 'tinyint':
       return 'Joi.boolean()';
