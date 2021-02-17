@@ -33,6 +33,8 @@ const findschema = require('./template/graphql-schema');
 
 const findhelper = require('./template/graphql-helper');
 
+const findhook = require('./template/graphql-hook');
+
 const fs = require('fs');
 const { promisify } = require('util');
 
@@ -43,6 +45,7 @@ const modelFunction = {
   findresolver,
   findschema,
   findhelper,
+  findhook,
   // findmodel,
   // findinput,
   // findargs,
@@ -50,7 +53,15 @@ const modelFunction = {
 };
 
 // const codeTypeArray = ['SequelizeModel', 'service', 'graphql', 'model', 'args', 'input', 'order'];
-const codeTypeArray = ['SequelizeModel', 'graphql', 'schema', 'resolver', 'service', 'helper'];
+const codeTypeArray = [
+  'SequelizeModel',
+  'graphql',
+  'schema',
+  'resolver',
+  'service',
+  'hook',
+  'helper',
+];
 /**
  * 初始化
  */
@@ -127,6 +138,7 @@ const filePathObj = {
   resolver: './src/app/graphql',
   schema: './src/lib/schemas',
   helper: './packages/helper-api/src/lib/model',
+  hooks: './src/lib/hooks',
 };
 /**
  * 创建文件
@@ -188,7 +200,10 @@ const envConfig = async () => {
   const sequelizeCliConfigExists = await pathexists(configPath);
   const localConfig = await pathexists(localConfigPath);
   if (!sequelizeCliConfigExists && !localConfig) {
-    console.error(chalk.white.bgRed.bold(`Error: `) + `\t [${configPath}] not find,must have local sequelize-cli!`);
+    console.error(
+      chalk.white.bgRed.bold(`Error: `) +
+        `\t [${configPath}] not find,must have local sequelize-cli!`
+    );
     throw new Error(`\t [${configPath}] not find,must have local sequelize-cli!`);
   } else if (sequelizeCliConfigExists) {
     const dbConfig = shell.cat(configPath);
@@ -269,6 +284,10 @@ const run = async () => {
     type.fileType.forEach(async (t) => {
       const funcName = `find${t}`;
       const tempTxt = await modelFunction[funcName](columnList, p, keyColumnList);
+      if (!tempTxt) {
+        // 输出内容为空则 不生成文件
+        return;
+      }
       const filename = p.name.replace(/_/g, '-');
       createFile(filename, tempTxt, t)
         .then(() => {
