@@ -1,10 +1,10 @@
 {
-  "username": "root_develop",
-  "password": "eegDed-gbdacu3-ntuplw",
-  "database": "integral_recycling_dev02",
+  "username": "x",
+  "password": "xxx-x-xx",
+  "database": "xxx",
   "port": "53306",
-  "host": "rm-8vb5a7c204kxc3g93wo.mysql.zhangbei.rds.aliyuncs.com",
+  "host": "x-x.x.x.x.x.x",
   "dialect": "mysql",
-  "seederStorage": "sequelize",
-  "seederStorageTableName": "sequelizedata"
+  "seederStorage": "x",
+  "seederStorageTableName": "x"
 }
