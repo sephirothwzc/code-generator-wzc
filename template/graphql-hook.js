@@ -28,7 +28,7 @@ const pascalName = require('../utils/name-case');
  * @param {*} keyColumnList
  */
 const findForeignKey = (tableItem, keyColumnList) => {
-  const importList = [];
+  const importList = new Set();
   const delList = [];
   const bbProperty = [];
   if (keyColumnList.length <= 0) {
@@ -40,10 +40,10 @@ const findForeignKey = (tableItem, keyColumnList) => {
   }
   foreignList.forEach((p) => {
     // 当前表主表 主键
-    importList.push(`import {
-  ${pascalName(p.REFERENCED_TABLE_NAME)}Model,
-  ${_.toUpper(p.REFERENCED_TABLE_NAME)},
-} from '../models/${p.REFERENCED_TABLE_NAME.replace(/_/g, '-')}.model';`);
+    importList.add(`import {
+  ${pascalName(p.TABLE_NAME)}Model,
+  ${_.toUpper(p.TABLE_NAME)},
+} from '../models/${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
     bbProperty.push(pascalName(p.CONSTRAINT_NAME, false));
     delList.push(`        ${pascalName(p.CONSTRAINT_NAME, false)}: ${pascalName(
       p.TABLE_NAME
@@ -63,9 +63,9 @@ ${delList.join(`
       throw new Error('已使用数据禁止删除');
     }
   }`;
-  importList && importList.push(`import * as Bb from 'bluebird';`);
+  importList && importList.add(`import * as Bb from 'bluebird';`);
   return {
-    strimport: importList.join(`
+    strimport: Array.from(importList).join(`
 `),
     strdel,
   };
