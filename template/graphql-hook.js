@@ -8,6 +8,8 @@ const { toUpper } = require('lodash');
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
 
+const strimport = new Set();
+
 /**
  * 
  * RowDataPacket {
@@ -28,19 +30,18 @@ const pascalName = require('../utils/name-case');
  * @param {*} keyColumnList
  */
 const findForeignKey = (tableItem, keyColumnList) => {
-  const importList = new Set();
   const delList = [];
   const bbProperty = [];
   if (keyColumnList.length <= 0) {
-    return { strimport: '', strdel: '' };
+    return '';
   }
   const foreignList = keyColumnList.filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name);
   if (foreignList.length <= 0) {
-    return { strimport: '', strdel: '' };
+    return '';
   }
   foreignList.forEach((p) => {
     // 当前表主表 主键
-    importList.add(`import {
+    strimport.add(`import {
   ${pascalName(p.TABLE_NAME)}Model,
   ${_.toUpper(p.TABLE_NAME)},
 } from '../models/${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
@@ -63,12 +64,8 @@ ${delList.join(`
       throw new Error('已使用数据禁止删除');
     }
   }`;
-  importList && importList.add(`import * as Bb from 'bluebird';`);
-  return {
-    strimport: Array.from(importList).join(`
-`),
-    strdel,
-  };
+  strimport && strimport.add(`import * as Bb from 'bluebird';`);
+  return strdel;
 };
 
 /**
@@ -84,7 +81,11 @@ const findCommentUnique = (tableItem, columnList) => {
   if (rowList.length <= 0) {
     return '';
   }
-  console.log(rowList);
+  strimport.add(
+    `import { ${_.toUpper(tableItem.name)}, ${pascalName(
+      tableItem.name
+    )}Model } from '../models/${tableItem.name.replace(/_/g, '-')}.model';`
+  );
   const listPropertyUpdate = rowList
     .map((p, index) => {
       return `
@@ -128,7 +129,7 @@ const findCommentUnique = (tableItem, columnList) => {
     .join();
   const msg = `
   async beforeUpdate(
-    model: DeviceCommunitybucketModel,
+    model: ${pascalName(tableItem.name)}Model,
     options: { transaction: Transaction; validate: Boolean; returning: Boolean }
   ) {
     const changed = model.changed();
@@ -139,7 +140,7 @@ ${listPropertyUpdate}
   }
 
   async beforeCreate(
-    model: DeviceCommunitybucketModel,
+    model: ${pascalName(tableItem.name)}Model,
     options: { transaction: Transaction; validate: Boolean; returning: Boolean }
   ) {
 ${listPropertyCreate}
@@ -149,7 +150,7 @@ ${listPropertyCreate}
 };
 
 const modelTemplate = (tableItem, keyColumnList, columnList) => {
-  const { strimport, strdel } = findForeignKey(tableItem, keyColumnList);
+  const strdel = findForeignKey(tableItem, keyColumnList);
   const uniquestr = findCommentUnique(tableItem, columnList);
   if (!strdel && !uniquestr) {
     return undefined;
@@ -157,10 +158,8 @@ const modelTemplate = (tableItem, keyColumnList, columnList) => {
   return `import * as _ from 'lodash';
 import { provide } from 'midway';
 import { Transaction } from 'sequelize/types';
-import { ${_.toUpper(tableItem.name)}, ${pascalName(
-    tableItem.name
-  )}Model } from '../models/${tableItem.name.replace(/_/g, '-')}.model';
-${strimport}
+${Array.from(strimport).join(`
+`)}
 
 @provide('${pascalName(tableItem.name)}Hook')
 export class ${pascalName(tableItem.name)}Hook {
@@ -177,6 +176,7 @@ ${uniquestr}
  * @param {*} tableItem
  */
 const findHook = async (columnList, tableItem, keyColumnList) => {
+  strimport.clear();
   return modelTemplate(tableItem, keyColumnList, columnList);
 };
 
