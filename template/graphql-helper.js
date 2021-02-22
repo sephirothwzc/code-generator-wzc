@@ -9,7 +9,19 @@ const pascalName = require('../utils/name-case');
 // 是否添加引用
 let txtImport = new Set();
 
-const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'created_id', 'updated_id', 'deleted_id', 'i18n', 'business_code'];
+const notColumn = [
+  'id',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+  'created_user',
+  'updated_user',
+  'created_id',
+  'updated_id',
+  'deleted_id',
+  'i18n',
+  'business_code',
+];
 
 const findTypeTxt = (columnRow) => {
   switch (columnRow.DATA_TYPE) {
@@ -157,16 +169,29 @@ const findForeignKey = (tableItem, keyColumnList) => {
   return keyColumnList
     .map((p) => {
       if (p.TABLE_NAME === tableItem.name) {
-        p.REFERENCED_TABLE_NAME !== p.TABLE_NAME && txtImport.add(`import { ${pascalName(p.REFERENCED_TABLE_NAME)}Model } from './${p.REFERENCED_TABLE_NAME.replace(/_/g, '-')}.model';`);
+        p.REFERENCED_TABLE_NAME !== p.TABLE_NAME &&
+          txtImport.add(
+            `import { ${pascalName(
+              p.REFERENCED_TABLE_NAME
+            )}Model } from './${p.REFERENCED_TABLE_NAME.replace(/_/g, '-')}.model';`
+          );
         // 子表 外键 BelongsTo
         return `
   ${pascalName(p.COLUMN_NAME, false)}Obj: ${pascalName(p.REFERENCED_TABLE_NAME)}Model;
 `;
       } else {
-        p.REFERENCED_TABLE_NAME !== p.TABLE_NAME && txtImport.add(`import { ${pascalName(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
+        p.REFERENCED_TABLE_NAME !== p.TABLE_NAME &&
+          txtImport.add(
+            `import { ${pascalName(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(
+              /_/g,
+              '-'
+            )}.model';`
+          );
         // 主表 主键 Hasmany
         return `
-  ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: Array<${pascalName(p.TABLE_NAME)}Model>;
+  ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: Array<${pascalName(
+          p.TABLE_NAME
+        )}Model>;
 `;
       }
     })
@@ -174,7 +199,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
 };
 
 const modelTemplate = (propertyTxt, enumTxt, registerEnumType, tableItem, keyColums) => {
-  return `import type { BaseModel } from '../base/model.base';
+  return `import type { BaseModel } from 'cyberstone-modules/graphql/base-model';
 ${Array.from(txtImport).join(`
 `)}
 // #region enum${enumTxt}
@@ -211,7 +236,14 @@ const findhelper = async (columnList, tableItem, keyColumnList) => {
       enumTxt += _.get(colEnum, 'txt', '');
       registerEnumType += _.get(colEnum, 'registerEnumType', '');
       const sequelizeType = findSequelizeType(p);
-      propertyTxt += findProperty(typeString, _.get(colEnum, 'enumTypeName'), sequelizeType, p, keyColumnList, tableItem);
+      propertyTxt += findProperty(
+        typeString,
+        _.get(colEnum, 'enumTypeName'),
+        sequelizeType,
+        p,
+        keyColumnList,
+        tableItem
+      );
     });
   return modelTemplate(propertyTxt, enumTxt, registerEnumType, tableItem, keyColums);
 };

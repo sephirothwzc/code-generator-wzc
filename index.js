@@ -137,7 +137,7 @@ const filePathObj = {
   graphql: './src/app/graphql',
   resolver: './src/app/graphql',
   schema: './src/lib/schemas',
-  helper: './packages/helper-api/src/lib/model',
+  helper: './packages/model',
   hook: './src/lib/hooks',
 };
 /**
