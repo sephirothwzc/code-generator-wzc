@@ -101,7 +101,7 @@ const findCommentUnique = (tableItem, columnList) => {
         transaction: options?.transaction,
       });
       if (item${index}) {
-        throw new Error('${p.COLUMN_COMMENT}已存在');
+        throw new Error('${p.COLUMN_COMMENT.replace('[unique]', '')}已存在');
       }
     }
     `;
@@ -120,7 +120,7 @@ const findCommentUnique = (tableItem, columnList) => {
         transaction: options?.transaction,
       });
       if (item${index}) {
-        throw new Error('${p.COLUMN_COMMENT}已存在');
+        throw new Error('${p.COLUMN_COMMENT.replace('[unique]', '')}已存在');
       }
     }
     `;
