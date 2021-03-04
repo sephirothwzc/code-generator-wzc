@@ -41,10 +41,11 @@ const findForeignKey = (tableItem, keyColumnList) => {
   }
   foreignList.forEach((p) => {
     // 当前表主表 主键
-    strimport.add(`import {
-  ${pascalName(p.TABLE_NAME)}Model,
-  ${_.toUpper(p.TABLE_NAME)},
-} from '../models/${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
+    strimport.add(
+      `import { ${_.toUpper(p.TABLE_NAME)}, ${pascalName(
+        p.TABLE_NAME
+      )}Model } from '../models/${p.TABLE_NAME.replace(/_/g, '-')}.model';`
+    );
     bbProperty.push(pascalName(p.CONSTRAINT_NAME, false));
     delList.push(`        ${pascalName(p.CONSTRAINT_NAME, false)}: ${pascalName(
       p.TABLE_NAME
@@ -86,17 +87,16 @@ const findCommentUnique = (tableItem, columnList) => {
       tableItem.name
     )}Model } from '../models/${tableItem.name.replace(/_/g, '-')}.model';`
   );
-  const listPropertyUpdate = rowList
-    .map((p, index) => {
-      return `
+  const listPropertyUpdate = rowList.map((p, index) => {
+    return `
     if (changed.includes(${toUpper(p.TABLE_NAME)}.${_.toUpper(
-        p.COLUMN_NAME
-      )}) && model.get('${pascalName(p.COLUMN_NAME)}')) {
+      p.COLUMN_NAME
+    )}) && model.get('${pascalName(p.COLUMN_NAME)}')) {
       const item${index} = await ${pascalName(p.TABLE_NAME)}Model.findOne({
         where: {
           [${toUpper(p.TABLE_NAME)}.${_.toUpper(p.COLUMN_NAME)}]: model.get('${pascalName(
-        p.COLUMN_NAME
-      )}'),
+      p.COLUMN_NAME
+    )}'),
         },
         transaction: options?.transaction,
       });
@@ -105,18 +105,17 @@ const findCommentUnique = (tableItem, columnList) => {
       }
     }
     `;
-    })
-    .join();
+  }).join(`
+`);
 
-  const listPropertyCreate = rowList
-    .map((p, index) => {
-      return `
+  const listPropertyCreate = rowList.map((p, index) => {
+    return `
     if (model.get('${pascalName(p.COLUMN_NAME)}')) {
       const item${index} = await ${pascalName(p.TABLE_NAME)}Model.findOne({
         where: {
           [${toUpper(p.TABLE_NAME)}.${_.toUpper(p.COLUMN_NAME)}]: model.get('${pascalName(
-        p.COLUMN_NAME
-      )}'),
+      p.COLUMN_NAME
+    )}'),
         },
         transaction: options?.transaction,
       });
@@ -125,8 +124,8 @@ const findCommentUnique = (tableItem, columnList) => {
       }
     }
     `;
-    })
-    .join();
+  }).join(`
+`);
   const msg = `
   async beforeUpdate(
     model: ${pascalName(tableItem.name)}Model,
