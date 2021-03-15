@@ -30,7 +30,13 @@ const findTypeTxt = (tableName, columnRow) => {
       return 'JSONObject';
     case 'enum':
       enumTxt += `
-enum E${pascalName(tableName)}${pascalName(columnRow.COLUMN_NAME, true)}${columnRow.COLUMN_TYPE.replace('enum', '').replace(/\(/g, '{').replace(/\)/g, '}').replace(/[']/g, '')}`;
+enum E${pascalName(tableName)}${pascalName(
+        columnRow.COLUMN_NAME,
+        true
+      )}${columnRow.COLUMN_TYPE.replace('enum', '')
+        .replace(/\(/g, '{')
+        .replace(/\)/g, '}')
+        .replace(/[']/g, '')}`;
       return `E${pascalName(tableName)}${pascalName(columnRow.COLUMN_NAME, true)}`;
     default:
       return 'String';
@@ -80,11 +86,17 @@ extend type Query {
 
 extend type Mutation {
   # ${tableItem.comment} 新增 or 修改
-  ${pascalName(tableItem.name, false)}(param: ${pascalName(tableItem.name)}SaveIn!, must: Boolean = false): String
+  ${pascalName(tableItem.name, false)}(param: ${pascalName(
+    tableItem.name
+  )}SaveIn!, must: Boolean = false): String
   # ${tableItem.comment} 批量 新增 or 修改
-  ${pascalName(tableItem.name, false)}Bulk(param: [${pascalName(tableItem.name)}SaveIn]!): [JSONObject]
+  ${pascalName(tableItem.name, false)}Bulk(param: [${pascalName(
+    tableItem.name
+  )}SaveIn]!): [JSONObject]
   # ${tableItem.comment} 删除
   ${pascalName(tableItem.name, false)}Destroy(where: JSONObject!, limit: Int): String
+  # ${tableItem.comment} 根据id删除
+  ${pascalName(tableItem.name, false)}rDestroyById(id:String): String
 }
 
 input ${pascalName(tableItem.name)}SaveIn {
@@ -106,7 +118,9 @@ const findForeignKey = (tableItem, keyColumnList) => {
       } else {
         // 主表 主键 Hasmany 1 v N
         return `
-  ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}(param: QueryListParam): [${pascalName(p.TABLE_NAME)}]`;
+  ${pascalName(p.TABLE_NAME, false)}${pascalName(
+          p.COLUMN_NAME
+        )}(param: QueryListParam): [${pascalName(p.TABLE_NAME)}]`;
       }
     })
     .join('');
@@ -126,7 +140,9 @@ const findForeignKeyInput = (tableItem, keyColumnList) => {
     .map((p) => {
       // 主表 主键 Hasmany 1 v N
       return `
-  ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: [${pascalName(p.TABLE_NAME)}SaveIn]`;
+  ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: [${pascalName(
+        p.TABLE_NAME
+      )}SaveIn]`;
     })
     .join('');
 };
