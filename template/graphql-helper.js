@@ -80,67 +80,67 @@ const findSequelizeType = (element) => {
   }
 };
 
-/**
- * comment [info 1 初始化,close 0 关闭] or [info 初始化,close 关闭]or [info,close]
- * @param {*} columnRow 行
- */
-const findEnum = (tableName, columnRow) => {
-  let value;
-  if (!columnRow.COLUMN_COMMENT && columnRow.DATA_TYPE !== 'enum') {
-    return undefined;
-  }
-  if (columnRow.COLUMN_COMMENT) {
-    const regex2 = /\[(.+?)\]/g; // [] 中括号
-    value = columnRow.COLUMN_COMMENT.match(regex2);
-    if (value) {
-      value = value[value.length - 1].replace('[', '').replace(']', '');
-    }
-  }
-  if (columnRow.DATA_TYPE === 'enum' && !value) {
-    value = columnRow.COLUMN_TYPE.replace('enum', '').replace(/[()']/g, '');
-  }
-  if (!value) {
-    return undefined;
-  }
-  const ee = value
-    .split(/[,，]/)
-    .map((p) => {
-      const rd3 = p.split(' ');
-      if (rd3.length === 3) {
-        const val = rd3[1] ? ` = '${rd3[1]}'` : '';
-        return `  /**
-   * ${rd3[2]}
-   */
-  ${rd3[0]}${val},
-`;
-      } else if (rd3.length === 2) {
-        return `  /**
-   * ${rd3[1]}
-   */
-  ${rd3[0]} = '${rd3[0]}',
-`;
-      } else {
-        return `  /**
-   *
-   */
-  ${rd3[0]} = '${rd3[0]}',
-`;
-      }
-    })
-    .join('');
-  const enumTypeName = pascalName(columnRow.COLUMN_NAME);
-  const txt = `
-export enum E${pascalName(tableName)}${enumTypeName} {
-  all = '',
-${ee}
-}
-`;
+// /**
+//  * comment [info 1 初始化,close 0 关闭] or [info 初始化,close 关闭]or [info,close]
+//  * @param {*} columnRow 行
+//  */
+// const findEnum = (tableName, columnRow) => {
+//   let value;
+//   if (!columnRow.COLUMN_COMMENT && columnRow.DATA_TYPE !== 'enum') {
+//     return undefined;
+//   }
+//   if (columnRow.COLUMN_COMMENT) {
+//     const regex2 = /\[(.+?)\]/g; // [] 中括号
+//     value = columnRow.COLUMN_COMMENT.match(regex2);
+//     if (value) {
+//       value = value[value.length - 1].replace('[', '').replace(']', '');
+//     }
+//   }
+//   if (columnRow.DATA_TYPE === 'enum' && !value) {
+//     value = columnRow.COLUMN_TYPE.replace('enum', '').replace(/[()']/g, '');
+//   }
+//   if (!value) {
+//     return undefined;
+//   }
+//   const ee = value
+//     .split(/[,，]/)
+//     .map((p) => {
+//       const rd3 = p.split(' ');
+//       if (rd3.length === 3) {
+//         const val = rd3[1] ? ` = '${rd3[1]}'` : '';
+//         return `  /**
+//    * ${rd3[2]}
+//    */
+//   ${rd3[0]}${val},
+// `;
+//       } else if (rd3.length === 2) {
+//         return `  /**
+//    * ${rd3[1]}
+//    */
+//   ${rd3[0]} = '${rd3[0]}',
+// `;
+//       } else {
+//         return `  /**
+//    *
+//    */
+//   ${rd3[0]} = '${rd3[0]}',
+// `;
+//       }
+//     })
+//     .join('');
+//   const enumTypeName = pascalName(columnRow.COLUMN_NAME);
+//   const txt = `
+// export enum E${pascalName(tableName)}${enumTypeName} {
+//   all = '',
+// ${ee}
+// }
+// `;
 
-  return {
-    enumTypeName: `E${pascalName(tableName)}${enumTypeName}`,
-    txt,
-  };
-};
+//   return {
+//     enumTypeName: `E${pascalName(tableName)}${enumTypeName}`,
+//     txt,
+//   };
+// };
 
 /**
  * field 不设置null
@@ -232,7 +232,8 @@ const findhelper = async (columnList, tableItem, keyColumnList) => {
       // columnList.forEach(p => {
       keyColums = findForeignKey(tableItem, keyColumnList);
       const typeString = findTypeTxt(p);
-      const colEnum = findEnum(tableItem.name, p);
+      // const colEnum = findEnum(tableItem.name, p);
+      const colEnum = { txt: '' };
       enumTxt += _.get(colEnum, 'txt', '');
       registerEnumType += _.get(colEnum, 'registerEnumType', '');
       const sequelizeType = findSequelizeType(p);
