@@ -1,8 +1,8 @@
 /*
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
- * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-10-29 15:53:41
+ * @Last Modified by: mikey.zhaopeng
+ * @Last Modified time: 2021-04-21 15:02:04
  */
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
@@ -198,7 +198,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
     .join('');
 };
 
-const modelTemplate = (propertyTxt, enumTxt, registerEnumType, tableItem, keyColums) => {
+const modelTemplate = (propertyTxt, enumTxt, registerEnumType, tableItem, keyColums, objs) => {
   return `import type { BaseModel } from 'cyberstone-modules/graphql/base-model';
 ${Array.from(txtImport).join(`
 `)}
@@ -210,9 +210,34 @@ ${registerEnumType}
  * ${tableItem.comment}
  */
 export declare class ${pascalName(tableItem.name)}Model extends BaseModel {
-${propertyTxt}${keyColums}
+${propertyTxt}${keyColums}${objs}
 }
 `;
+};
+
+/**
+ * 根据每一列的备注判断 是否需要增加 obj {appUser}
+ * @param {*} columnList
+ */
+ const addObjByCommit = (columnList) => {
+  const propertyString = columnList
+    .filter((p) => p.COLUMN_COMMENT.match(/{(.+?)}/g))
+    .map((p) => {
+      const value = p.COLUMN_COMMENT.match(/{(.+?)}/g);
+      const txt = value[value.length - 1].replace('{', '').replace('}', '');
+      txtImport.add(
+        `import { ${pascalName(
+          txt
+        )}Model } from './${_.kebabCase(txt)}.model';`
+      );
+      return `  ${pascalName(p.COLUMN_NAME, false)}Obj: ${pascalName(txt)}Model;`;
+    }).join(`
+`);
+  return (
+    propertyString &&
+    `
+${propertyString}`
+  );
 };
 
 /**
@@ -246,7 +271,8 @@ const findhelper = async (columnList, tableItem, keyColumnList) => {
         tableItem
       );
     });
-  return modelTemplate(propertyTxt, enumTxt, registerEnumType, tableItem, keyColums);
+  const objs = addObjByCommit(columnList);
+  return modelTemplate(propertyTxt, enumTxt, registerEnumType, tableItem, keyColums, objs);
 };
 
 module.exports = findhelper;
