@@ -90,12 +90,14 @@ const findCommentUnique = (tableItem, columnList) => {
   const listPropertyUpdate = rowList.map((p, index) => {
     return `
     if (changed.includes(${toUpper(p.TABLE_NAME)}.${_.toUpper(
-      p.COLUMN_NAME
-    )}) && model.get('${pascalName(p.COLUMN_NAME)}')) {
+      p.COLUMN_NAME,
+      false
+    )}) && model.get('${pascalName(p.COLUMN_NAME, false)}')) {
       const item${index} = await ${pascalName(p.TABLE_NAME)}Model.findOne({
         where: {
           [${toUpper(p.TABLE_NAME)}.${_.toUpper(p.COLUMN_NAME)}]: model.get('${pascalName(
-      p.COLUMN_NAME
+      p.COLUMN_NAME,
+      false
     )}'),
         },
         transaction: options?.transaction,
@@ -110,11 +112,12 @@ const findCommentUnique = (tableItem, columnList) => {
 
   const listPropertyCreate = rowList.map((p, index) => {
     return `
-    if (model.get('${pascalName(p.COLUMN_NAME)}')) {
+    if (model.get('${pascalName(p.COLUMN_NAME, false)}')) {
       const item${index} = await ${pascalName(p.TABLE_NAME)}Model.findOne({
         where: {
           [${toUpper(p.TABLE_NAME)}.${_.toUpper(p.COLUMN_NAME)}]: model.get('${pascalName(
-      p.COLUMN_NAME
+      p.COLUMN_NAME,
+      false
     )}'),
         },
         transaction: options?.transaction,
