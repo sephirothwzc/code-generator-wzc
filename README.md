@@ -28,3 +28,12 @@ run
 # run
 $ yarn codeGeneratorWzc
 ```
+
+### changelog
+
+- 外键属性命名 表名+字段名
+- count 与 list 分开 删除 all 方法 对象名+Count
+
+### hooks
+
+- communt： [unique]

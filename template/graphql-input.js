@@ -2,28 +2,19 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-09 19:57:34
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-04-19 23:10:58
+ * @Last Modified time: 2020-10-29 15:54:12
  */
 const _ = require('lodash');
-const inflect = require('i')();
+const pascalName = require('../utils/name-case');
 
-const notColumn = [
-  'id',
-  'created_at',
-  'updated_at',
-  'deleted_at',
-  'created_user',
-  'updated_user',
-  'code',
-  'i18n'
-];
+const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'i18n'];
 
 const gqlTypeMapper = {
   GraphQLJSON: {
-    txt: '()=> GraphQLJSON, '
-  }
+    txt: '()=> GraphQLJSON, ',
+  },
 };
-const findTypeTxt = columnRow => {
+const findTypeTxt = (columnRow) => {
   switch (columnRow.DATA_TYPE) {
     case 'bigint':
     case 'nvarchar':
@@ -41,9 +32,9 @@ const findTypeTxt = columnRow => {
     case 'json':
       return 'Record<string, any>';
   }
-}
+};
 
-const findGqlType = element => {
+const findGqlType = (element) => {
   switch (element.DATA_TYPE) {
     case 'nvarchar':
     case 'varchar':
@@ -64,9 +55,9 @@ const findGqlType = element => {
     case 'json':
       return 'GraphQLJSON';
   }
-}
+};
 
-const findEnum = columnRow => {
+const findEnum = (columnRow) => {
   if (!columnRow.COLUMN_COMMENT) {
     return undefined;
   }
@@ -79,8 +70,8 @@ const findEnum = columnRow => {
   const enumTypeName = _.camelCase(columnRow.COLUMN_NAME);
   return {
     enumTypeName: `E${enumTypeName}`,
-  }
-}
+  };
+};
 
 const findProperty = (typeString, enumTypeName, gqlType, columnRow) => {
   const nullable = columnRow.IS_NULLABLE === 'YES' ? ', nullable: true ' : '';
@@ -89,9 +80,9 @@ const findProperty = (typeString, enumTypeName, gqlType, columnRow) => {
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */
   @Field(${gqlTypeTxt}{ description: '${columnRow.COLUMN_COMMENT}'${nullable} })
-  ${inflect.camelize(columnRow.COLUMN_NAME, false)}?: ${enumTypeName || typeString};
+  ${pascalName(columnRow.COLUMN_NAME, false)}?: ${enumTypeName || typeString};
 `;
-}
+};
 
 const modelTemplate = (propertyTxt, enumTxt, constTxt, tableItem) => {
   return `import { InputType, Field } from '@nestjs/graphql';
@@ -99,28 +90,31 @@ import { BaseInput } from 'src/base/base.input';
 // import GraphQLJSON from 'graphql-type-json';
 
 @InputType()
-export class ${inflect.camelize(tableItem.name)}Input extends BaseInput {
+export class ${pascalName(tableItem.name)}Input extends BaseInput {
 ${propertyTxt}
 }
 `;
-
-}
+};
 
 /**
- * 
- * @param {*} mysqlHelper 
- * @param {*} tableItem 
+ *
+ * @param {*} mysqlHelper
+ * @param {*} tableItem
  */
 const findinput = async (columnList, tableItem) => {
-  let enumTxt = '', propertyTxt = '', constTxt = '';
-  columnList.filter(p => !notColumn.includes(p.COLUMN_NAME)).forEach(p => {
-    // columnList.forEach(p => {
-    const typeString = findTypeTxt(p);
-    const colEnum = findEnum(p);
-    const gqlType = findGqlType(p);
-    propertyTxt += findProperty(typeString, _.get(colEnum, 'enumTypeName'), gqlType, p);
-  });
+  let enumTxt = '',
+    propertyTxt = '',
+    constTxt = '';
+  columnList
+    .filter((p) => !notColumn.includes(p.COLUMN_NAME))
+    .forEach((p) => {
+      // columnList.forEach(p => {
+      const typeString = findTypeTxt(p);
+      const colEnum = findEnum(p);
+      const gqlType = findGqlType(p);
+      propertyTxt += findProperty(typeString, _.get(colEnum, 'enumTypeName'), gqlType, p);
+    });
   return modelTemplate(propertyTxt, enumTxt, constTxt, tableItem);
-}
+};
 
 module.exports = findinput;

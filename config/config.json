@@ -1,8 +1,10 @@
 {
+  "username": "x",
+  "password": "xxx-x-xx",
+  "database": "xxx",
+  "port": "53306",
+  "host": "x-x.x.x.x.x.x",
   "dialect": "mysql",
-  "host": "xx",
-  "port": "xx",
-  "username": "xx",
-  "password": "xx",
-  "database": "xx"
+  "seederStorage": "x",
+  "seederStorageTableName": "x"
 }

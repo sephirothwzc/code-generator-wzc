@@ -2,7 +2,7 @@
  * @Author: zhanchao.wu
  * @Date: 2020-04-08 23:05:41
  * @Last Modified by: zhanchao.wu
- * @Last Modified time: 2020-09-04 01:04:44
+ * @Last Modified time: 2020-10-23 10:23:09
  */
 const mysql = require('mysql');
 
@@ -16,7 +16,7 @@ class MySqlHelper {
   }
 
   [findTablesSql]() {
-    return `select table_name AS name,table_comment AS comment from information_schema.tables where table_schema='${this.connString.database}' order by table_name`;
+    return `select table_name AS name,table_comment AS comment from information_schema.tables where table_name <> 'sequelizemeta' and table_schema='${this.connString.database}' order by table_name`;
   }
 
   [findColumnSql](tableName) {
@@ -52,8 +52,9 @@ class MySqlHelper {
        AND R.CONSTRAINT_NAME = C.CONSTRAINT_NAME
        AND R.REFERENCED_TABLE_NAME = C.REFERENCED_TABLE_NAME
       WHERE C.REFERENCED_TABLE_NAME IS NOT NULL 
-				AND C.REFERENCED_TABLE_NAME = '${tableName}' or C.TABLE_NAME = '${tableName}'
-        AND C.TABLE_SCHEMA = '${this.connString.database}'`;
+				AND (C.REFERENCED_TABLE_NAME = '${tableName}' or C.TABLE_NAME = '${tableName}')
+        AND C.TABLE_SCHEMA = '${this.connString.database}'
+        group by CONSTRAINT_NAME order by CONSTRAINT_NAME`;
   }
 
   async query(sql) {
