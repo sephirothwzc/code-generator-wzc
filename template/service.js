@@ -92,7 +92,7 @@ ${propsSetString}
 const modelTemplate = (tableItem, keyColumnList) => {
   const { createString, txtImport } = findForeignKey(tableItem, keyColumnList);
   return `import { provide, inject } from 'midway';
-import { Transaction } from 'sequelize/types';
+import { CreateOptions, Transaction } from 'sequelize/types';
 import { ServiceGenericBase } from '../lib/base/service-generic.base';
 import { I${pascalName(tableItem.name)}Model, ${pascalName(
     tableItem.name
