@@ -56,7 +56,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
   if (txtImport.size <= 0 || txtProp.size <= 0) {
     // 为空不生成
     return {
-      createOptions: '',
+      createString: '',
       txtImport: '',
     };
   }
@@ -92,7 +92,7 @@ ${propsSetString}
 const modelTemplate = (tableItem, keyColumnList) => {
   const { createString, txtImport } = findForeignKey(tableItem, keyColumnList);
   return `import { provide, inject } from 'midway';
-import { CreateOptions, Transaction } from 'sequelize/types';
+${createString ? '' : '// '}import { CreateOptions, Transaction } from 'sequelize/types';
 import { ServiceGenericBase } from '../lib/base/service-generic.base';
 import { I${pascalName(tableItem.name)}Model, ${pascalName(
     tableItem.name
