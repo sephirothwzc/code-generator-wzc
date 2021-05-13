@@ -36,16 +36,18 @@ const findForeignKey = (tableItem, keyColumnList) => {
         )}Service } from './${p.REFERENCED_TABLE_NAME.replace(/_/g, '-')}.service';`
       );
       txtProp.add(`  @inject()
-  ${pascalName(p.TABLE_NAME, false)}Service: I${pascalName(p.TABLE_NAME)}Service;`);
+  ${pascalName(p.REFERENCED_TABLE_NAME, false)}Service: I${pascalName(
+        p.REFERENCED_TABLE_NAME
+      )}Service;`);
       propsSetList.add(`      if (values.${pascalName(
         p.COLUMN_NAME,
         false
       )}Obj && !values.${pascalName(p.COLUMN_NAME, false)}) {
         values.${pascalName(p.COLUMN_NAME, false)} = (
-          await this.${pascalName(p.TABLE_NAME, false)}Service.create(values.${pascalName(
-        p.COLUMN_NAME,
-        false
-      )}Obj, {
+          await this.${pascalName(
+            p.REFERENCED_TABLE_NAME,
+            false
+          )}Service.create(values.${pascalName(p.COLUMN_NAME, false)}Obj, {
             transaction: t,
           })
         ).get('id');
@@ -90,6 +92,7 @@ ${propsSetString}
 const modelTemplate = (tableItem, keyColumnList) => {
   const { createString, txtImport } = findForeignKey(tableItem, keyColumnList);
   return `import { provide, inject } from 'midway';
+import { Transaction } from 'sequelize/types';
 import { ServiceGenericBase } from '../lib/base/service-generic.base';
 import { I${pascalName(tableItem.name)}Model, ${pascalName(
     tableItem.name
