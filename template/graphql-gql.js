@@ -85,6 +85,10 @@ extend type Query {
 }
 
 extend type Mutation {
+  # ${tableItem.comment} 新增
+  ${pascalName(tableItem.name, false)}Create(param: ${pascalName(
+    tableItem.name
+  )}SaveIn!): ${pascalName(tableItem.name)}SaveIn
   # ${tableItem.comment} 新增 or 修改
   ${pascalName(tableItem.name, false)}(param: ${pascalName(
     tableItem.name
@@ -135,7 +139,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
  */
 const findForeignKeyInput = (tableItem, keyColumnList) => {
   // @Field({ description: '编码', nullable: true })
-  return keyColumnList
+  const list = keyColumnList
     .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
     .map((p) => {
       // 主表 主键 Hasmany 1 v N
@@ -143,8 +147,15 @@ const findForeignKeyInput = (tableItem, keyColumnList) => {
   ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: [${pascalName(
         p.TABLE_NAME
       )}SaveIn]`;
-    })
-    .join('');
+    });
+  const item = keyColumnList
+    .filter((p) => p.TABLE_NAME === tableItem.name)
+    .map((p) => {
+      // 主表 主键 Hasmany 1 v N
+      return `
+  ${pascalName(p.COLUMN_NAME, false)}Obj: ${pascalName(p.REFERENCED_TABLE_NAME)}SaveIn`;
+    });
+  return [...list, ...item].join('');
 };
 
 /**
