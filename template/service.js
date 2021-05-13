@@ -28,7 +28,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
   const propsSetList = new Set();
 
   keyColumnList
-    .filter((p) => p.TABLE_NAME === tableItem.name)
+    .filter((p) => p.TABLE_NAME === tableItem.name && p.REFERENCED_TABLE_NAME !== tableItem.name)
     .forEach((p) => {
       txtImport.add(
         `import { I${pascalName(
