@@ -53,7 +53,7 @@ const findForeignKey = (tableItem, keyColumnList) => {
         ).get('id');
       }`);
     });
-  if (txtImport.size <= 0) {
+  if (txtImport.size <= 0 || txtProp.size <= 0) {
     // 为空不生成
     return {
       createOptions: '',
@@ -66,20 +66,20 @@ const findForeignKey = (tableItem, keyColumnList) => {
 `);
   const createString = `
 ${propsString}
-
   /**
    * 新增
    * @param values
    */
-  public async create(values: ${pascalName(tableItem.name)}Model): Promise<${pascalName(
+  public async create(values: ${pascalName(
     tableItem.name
-  )}Model> {
-    return await this.db.sequelize.transaction(async (t: Transaction) => {
+  )}Model, useOptions?: CreateOptions): Promise<${pascalName(tableItem.name)}Model> {
+    const run = async (t: Transaction) => {
 ${propsSetString}
       return super.create(values, {
         transaction: t,
       });
-    });
+    };
+    return await this.useTransaction(run, useOptions);
   }
   `;
   return {

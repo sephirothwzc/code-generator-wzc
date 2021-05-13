@@ -100,7 +100,7 @@ extend type Mutation {
   # ${tableItem.comment} 删除
   ${pascalName(tableItem.name, false)}Destroy(where: JSONObject!, limit: Int): String
   # ${tableItem.comment} 根据id删除
-  ${pascalName(tableItem.name, false)}DestroyById(id:String): String
+  ${pascalName(tableItem.name, false)}DestroyById(id: String): String
 }
 
 input ${pascalName(tableItem.name)}SaveIn {
