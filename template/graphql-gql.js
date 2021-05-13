@@ -88,7 +88,7 @@ extend type Mutation {
   # ${tableItem.comment} 新增
   ${pascalName(tableItem.name, false)}Create(param: ${pascalName(
     tableItem.name
-  )}SaveIn!): ${pascalName(tableItem.name)}SaveIn
+  )}SaveIn!): ${pascalName(tableItem.name)}
   # ${tableItem.comment} 新增 or 修改
   ${pascalName(tableItem.name, false)}(param: ${pascalName(
     tableItem.name
