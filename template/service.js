@@ -91,10 +91,9 @@ const modelTemplate = (tableItem, keyColumnList) => {
   const { createString, txtImport } = findForeignKey(tableItem, keyColumnList);
   return `import { provide, inject } from 'midway';
 import { ServiceGenericBase } from '../lib/base/service-generic.base';
-import { I${pascalName(tableItem.name)}Model } from '../lib/models/${tableItem.name.replace(
-    /_/g,
-    '-'
-  )}.model';
+import { I${pascalName(tableItem.name)}Model, ${pascalName(
+    tableItem.name
+  )}Model } from '../lib/models/${tableItem.name.replace(/_/g, '-')}.model';
 ${txtImport}
 
 export interface I${pascalName(tableItem.name)}Service extends ${pascalName(
