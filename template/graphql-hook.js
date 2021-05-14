@@ -51,12 +51,15 @@ const findForeignKey = (tableItem, keyColumnList) => {
       p.TABLE_NAME
     )}Model.findOne({
           where: {
-            [${_.toUpper(p.TABLE_NAME)}.${_.toUpper(p.COLUMN_NAME)}]: _.get(model, 'where.id'),
+            [${_.toUpper(p.TABLE_NAME)}.${_.toUpper(p.COLUMN_NAME)}]: model.get('id'),
           },
         }),`);
   });
   const strdel = `
-  async beforeBulkDestroy(model: { where: {id: string}; transaction: Transaction }) {
+  async beforeDestroy(
+    model: ${pascalName(tableItem.name)}Model,
+    options: { transaction: Transaction; validate: Boolean; returning: Boolean }
+  ) {
     const { ${bbProperty.join(', ')} } = await Bb.props({
 ${delList.join(`
 `)}
