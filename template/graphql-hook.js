@@ -40,6 +40,12 @@ const findForeignKey = (tableItem, keyColumnList) => {
     return '';
   }
   foreignList.forEach((p) => {
+    strimport.add(
+      `import { ${pascalName(p.TABLE_NAME)}Model } from '../models/${p.TABLE_NAME.replace(
+        /_/g,
+        '-'
+      )}.model';`
+    );
     // 当前表主表 主键
     strimport.add(
       `import { ${_.toUpper(p.TABLE_NAME)}, ${pascalName(
