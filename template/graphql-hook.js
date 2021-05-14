@@ -9,6 +9,7 @@ const _ = require('lodash');
 const pascalName = require('../utils/name-case');
 
 const strimport = new Set();
+let modelImport = '';
 
 /**
  * 
@@ -39,13 +40,10 @@ const findForeignKey = (tableItem, keyColumnList) => {
   if (foreignList.length <= 0) {
     return '';
   }
+  modelImport = `import { ${pascalName(
+    tableItem.name
+  )}Model } from '../models/${tableItem.name.replace(/_/g, '-')}.model';`;
   foreignList.forEach((p) => {
-    strimport.add(
-      `import { ${pascalName(p.TABLE_NAME)}Model } from '../models/${p.TABLE_NAME.replace(
-        /_/g,
-        '-'
-      )}.model';`
-    );
     // 当前表主表 主键
     strimport.add(
       `import { ${_.toUpper(p.TABLE_NAME)}, ${pascalName(
@@ -91,11 +89,10 @@ const findCommentUnique = (tableItem, columnList) => {
   if (rowList.length <= 0) {
     return '';
   }
-  strimport.add(
-    `import { ${_.toUpper(tableItem.name)}, ${pascalName(
-      tableItem.name
-    )}Model } from '../models/${tableItem.name.replace(/_/g, '-')}.model';`
-  );
+  modelImport = `import { ${_.toUpper(tableItem.name)}, ${pascalName(
+    tableItem.name
+  )}Model } from '../models/${tableItem.name.replace(/_/g, '-')}.model';`;
+
   const listPropertyUpdate = rowList.map((p, index) => {
     return `
     if (changed.includes(${toUpper(p.TABLE_NAME)}.${_.toUpper(
@@ -166,6 +163,7 @@ const modelTemplate = (tableItem, keyColumnList, columnList) => {
   if (!strdel && !uniquestr) {
     return undefined;
   }
+  modelImport && strimport.add(modelImport);
   return `import * as _ from 'lodash';
 import { provide } from 'midway';
 import { Transaction } from 'sequelize/types';
