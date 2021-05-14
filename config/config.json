@@ -1,9 +1,9 @@
 {
-  "username": "root_develop",
-  "password": "eegDed-gbdacu3-ntuplw",
-  "database": "financial_system_dev",
-  "host": "rm-8vb5a7c204kxc3g93wo.mysql.zhangbei.rds.aliyuncs.com",
-  "port": "53306",
+  "username": "roxxxlop",
+  "password": "exxxxlw",
+  "database": "finaxxxev",
+  "host": "rm-8vbxxxcom",
+  "port": "34444",
   "dialect": "mysql",
   "seederStorage": "sequelize",
   "seederStorageTableName": "sequelizedata"
