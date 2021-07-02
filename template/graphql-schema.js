@@ -41,7 +41,7 @@ const findType = (columnList, tableItem) => {
     .filter((p) => !notColumn.includes(p.COLUMN_NAME))
     .map((col) => {
       return `  ${pascalName(col.COLUMN_NAME, false)}: ${findTypeTxt(col)}.description('${
-        col.COLUMN_COMMENT
+        col.COLUMN_COMMENT || pascalName(col.COLUMN_NAME, false)
       }'),`;
     }).join(`
 `);
