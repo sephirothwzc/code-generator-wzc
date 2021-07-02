@@ -219,17 +219,13 @@ ${propertyTxt}${keyColums}${objs}
  * 根据每一列的备注判断 是否需要增加 obj {appUser}
  * @param {*} columnList
  */
- const addObjByCommit = (columnList) => {
+const addObjByCommit = (columnList) => {
   const propertyString = columnList
     .filter((p) => p.COLUMN_COMMENT.match(/{(.+?)}/g))
     .map((p) => {
       const value = p.COLUMN_COMMENT.match(/{(.+?)}/g);
       const txt = value[value.length - 1].replace('{', '').replace('}', '');
-      txtImport.add(
-        `import { ${pascalName(
-          txt
-        )}Model } from './${_.kebabCase(txt)}.model';`
-      );
+      txtImport.add(`import { ${pascalName(txt)}Model } from './${_.kebabCase(txt)}.model';`);
       return `  ${pascalName(p.COLUMN_NAME, false)}Obj: ${pascalName(txt)}Model;`;
     }).join(`
 `);

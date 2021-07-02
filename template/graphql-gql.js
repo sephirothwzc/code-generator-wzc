@@ -60,6 +60,35 @@ const findType = (columnList, tableItem, keyColumnList) => {
   // 自定义外键对象
   const objList = addObjByCommit(columnList);
 
+  const mutationString =
+    tableItem.tableType !== 'VIEW'
+      ? `
+extend type Mutation {
+  # ${tableItem.comment} 新增
+  ${pascalName(tableItem.name, false)}Create(param: ${pascalName(
+          tableItem.name
+        )}SaveIn!): ${pascalName(tableItem.name)}
+  # ${tableItem.comment} 新增 or 修改
+  ${pascalName(tableItem.name, false)}(param: ${pascalName(
+          tableItem.name
+        )}SaveIn!, must: Boolean = false): String
+  # ${tableItem.comment} 批量 新增 or 修改
+  ${pascalName(tableItem.name, false)}Bulk(param: [${pascalName(
+          tableItem.name
+        )}SaveIn]!): [JSONObject]
+  # ${tableItem.comment} 删除
+  ${pascalName(tableItem.name, false)}Destroy(where: JSONObject!, limit: Int): String
+  # ${tableItem.comment} 根据id删除
+  ${pascalName(tableItem.name, false)}DestroyById(id: String): String
+}
+
+input ${pascalName(tableItem.name)}SaveIn {
+  id: ID
+${property}${foreignKeyInput}
+}
+`
+      : '';
+
   const temp = `# ${tableItem.comment}
 type ${pascalName(tableItem.name)} {
   id: ID
@@ -83,30 +112,7 @@ extend type Query {
   # ${tableItem.comment} 有条件返回
   ${pascalName(tableItem.name, false)}All(param: QueryListParam): [${pascalName(tableItem.name)}]
 }
-
-extend type Mutation {
-  # ${tableItem.comment} 新增
-  ${pascalName(tableItem.name, false)}Create(param: ${pascalName(
-    tableItem.name
-  )}SaveIn!): ${pascalName(tableItem.name)}
-  # ${tableItem.comment} 新增 or 修改
-  ${pascalName(tableItem.name, false)}(param: ${pascalName(
-    tableItem.name
-  )}SaveIn!, must: Boolean = false): String
-  # ${tableItem.comment} 批量 新增 or 修改
-  ${pascalName(tableItem.name, false)}Bulk(param: [${pascalName(
-    tableItem.name
-  )}SaveIn]!): [JSONObject]
-  # ${tableItem.comment} 删除
-  ${pascalName(tableItem.name, false)}Destroy(where: JSONObject!, limit: Int): String
-  # ${tableItem.comment} 根据id删除
-  ${pascalName(tableItem.name, false)}DestroyById(id: String): String
-}
-
-input ${pascalName(tableItem.name)}SaveIn {
-  id: ID
-${property}${foreignKeyInput}
-}
+${mutationString}
 `;
   return temp;
 };

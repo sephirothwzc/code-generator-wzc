@@ -16,7 +16,7 @@ class MySqlHelper {
   }
 
   [findTablesSql]() {
-    return `select table_name AS name,table_comment AS comment from information_schema.tables where table_name <> 'sequelizemeta' and table_schema='${this.connString.database}' order by table_name`;
+    return `select table_name AS name,table_comment AS comment,table_type AS tableType from information_schema.tables where table_name <> 'sequelizemeta' and table_schema='${this.connString.database}' order by table_name`;
   }
 
   [findColumnSql](tableName) {

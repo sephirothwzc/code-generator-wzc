@@ -11,7 +11,18 @@ let importHasMany = false;
 let importBelongsTo = false;
 let txtImport = new Set();
 
-const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'created_id', 'updated_id', 'deleted_id', 'i18n'];
+const notColumn = [
+  'id',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+  'created_user',
+  'updated_user',
+  'created_id',
+  'updated_id',
+  'deleted_id',
+  'i18n',
+];
 
 const findTypeTxt = (columnRow) => {
   switch (columnRow.DATA_TYPE) {
@@ -140,11 +151,20 @@ ${ee}
  * @param {*} sequelizeType
  * @param {*} columnRow
  */
-const findProperty = (typeString, enumTypeName, sequelizeType, columnRow, keyColumnList, tableItem) => {
+const findProperty = (
+  typeString,
+  enumTypeName,
+  sequelizeType,
+  columnRow,
+  keyColumnList,
+  tableItem
+) => {
   const nullable = columnRow.IS_NULLABLE === 'YES' ? '?' : '';
   // console.log(keyColumnList);
   // console.log(`tableItem.name:${tableItem.name},columnRow.COLUMN_NAME:${columnRow.COLUMN_NAME}`);
-  const foreignKey = keyColumnList.find((p) => p.TABLE_NAME === tableItem.name && p.COLUMN_NAME === columnRow.COLUMN_NAME);
+  const foreignKey = keyColumnList.find(
+    (p) => p.TABLE_NAME === tableItem.name && p.COLUMN_NAME === columnRow.COLUMN_NAME
+  );
   // console.log(foreignKey);
   const foreignKeyTxt = foreignKey
     ? `
@@ -171,7 +191,12 @@ const findForeignKey = (tableItem, keyColumnList) => {
   return keyColumnList
     .map((p) => {
       if (p.TABLE_NAME === tableItem.name) {
-        p.REFERENCED_TABLE_NAME !== p.TABLE_NAME && txtImport.add(`import { ${pascalName(p.REFERENCED_TABLE_NAME)}Model } from './${p.REFERENCED_TABLE_NAME.replace(/_/g, '-')}.model';`);
+        p.REFERENCED_TABLE_NAME !== p.TABLE_NAME &&
+          txtImport.add(
+            `import { ${pascalName(
+              p.REFERENCED_TABLE_NAME
+            )}Model } from './${p.REFERENCED_TABLE_NAME.replace(/_/g, '-')}.model';`
+          );
         importBelongsTo = true;
         let hasManyTemp = '';
         // 自我关联
@@ -179,7 +204,9 @@ const findForeignKey = (tableItem, keyColumnList) => {
           importHasMany = true;
           hasManyTemp = `
   @HasMany(() => ${pascalName(p.TABLE_NAME)}Model, '${p.COLUMN_NAME}')
-  ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: Array<${pascalName(p.TABLE_NAME)}Model>;
+  ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: Array<${pascalName(
+            p.TABLE_NAME
+          )}Model>;
 `;
         }
         // 子表 外键 BelongsTo
@@ -188,12 +215,20 @@ const findForeignKey = (tableItem, keyColumnList) => {
   ${pascalName(p.COLUMN_NAME, false)}Obj: ${pascalName(p.REFERENCED_TABLE_NAME)}Model;
 ${hasManyTemp}`;
       } else {
-        p.REFERENCED_TABLE_NAME !== p.TABLE_NAME && txtImport.add(`import { ${pascalName(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
+        p.REFERENCED_TABLE_NAME !== p.TABLE_NAME &&
+          txtImport.add(
+            `import { ${pascalName(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(
+              /_/g,
+              '-'
+            )}.model';`
+          );
         importHasMany = true;
         // 主表 主键 Hasmany
         return `
   @HasMany(() => ${pascalName(p.TABLE_NAME)}Model, '${p.COLUMN_NAME}')
-  ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: Array<${pascalName(p.TABLE_NAME)}Model>;
+  ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: Array<${pascalName(
+          p.TABLE_NAME
+        )}Model>;
 `;
       }
     })
@@ -212,13 +247,21 @@ const findOptions = (tableItem, keyColumnList) => {
   const txtObj = keyColumnList
     .filter((p) => p.REFERENCED_TABLE_NAME === tableItem.name)
     .map((p) => {
-      txtImport.add(`import { ${pascalName(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(/_/g, '-')}.model';`);
+      txtImport.add(
+        `import { ${pascalName(p.TABLE_NAME)}Model } from './${p.TABLE_NAME.replace(
+          /_/g,
+          '-'
+        )}.model';`
+      );
       return `param.${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)} &&
       param.${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}.length > 0 &&
-      include.push({ model: ${pascalName(p.TABLE_NAME)}Model, as: '${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}' });`;
+      include.push({ model: ${pascalName(p.TABLE_NAME)}Model, as: '${pascalName(
+        p.TABLE_NAME,
+        false
+      )}${pascalName(p.COLUMN_NAME)}' });`;
     }).join(`
     `);
-  if (!txtIf) {
+  if (!txtIf || tableItem.tableType === 'VIEW') {
     // 为空不生成
     return { createOptions: '', optionsImport: txtImport };
   }
@@ -245,9 +288,19 @@ providerWrapper([
   return { createOptions, optionsImport: txtImport };
 };
 
-const modelTemplate = (propertyTxt, enumTxt, registerEnumType, constTxt, tableItem, keyColums, keyColumnList) => {
+const modelTemplate = (
+  propertyTxt,
+  enumTxt,
+  registerEnumType,
+  constTxt,
+  tableItem,
+  keyColums,
+  keyColumnList
+) => {
   const { createOptions } = findOptions(tableItem, keyColumnList);
-  const importSequelizeTypescript = `${importBelongsTo ? ', BelongsTo, ForeignKey' : ''}${importHasMany ? ', HasMany' : ''}`;
+  const importSequelizeTypescript = `${importBelongsTo ? ', BelongsTo, ForeignKey' : ''}${
+    importHasMany ? ', HasMany' : ''
+  }`;
   return `import { Table, Column, DataType${importSequelizeTypescript} } from 'sequelize-typescript';
 import { BaseModel } from '../base/model.base';
 import { providerWrapper } from 'midway';
@@ -315,7 +368,14 @@ const findSequelizeModel = async (columnList, tableItem, keyColumnList) => {
       enumTxt += _.get(colEnum, 'txt', '');
       registerEnumType += _.get(colEnum, 'registerEnumType', '');
       const sequelizeType = findSequelizeType(p);
-      propertyTxt += findProperty(typeString, _.get(colEnum, 'enumTypeName'), sequelizeType, p, keyColumnList, tableItem);
+      propertyTxt += findProperty(
+        typeString,
+        _.get(colEnum, 'enumTypeName'),
+        sequelizeType,
+        p,
+        keyColumnList,
+        tableItem
+      );
       constTxt += `
   /**
    * ${p.COLUMN_COMMENT}
@@ -323,7 +383,15 @@ const findSequelizeModel = async (columnList, tableItem, keyColumnList) => {
   static readonly ${_.toUpper(p.COLUMN_NAME)}: string = '${_.camelCase(p.COLUMN_NAME)}';
 `;
     });
-  return modelTemplate(propertyTxt, enumTxt, registerEnumType, constTxt, tableItem, keyColums, keyColumnList);
+  return modelTemplate(
+    propertyTxt,
+    enumTxt,
+    registerEnumType,
+    constTxt,
+    tableItem,
+    keyColums,
+    keyColumnList
+  );
 };
 
 module.exports = findSequelizeModel;

@@ -186,6 +186,9 @@ ${uniquestr}
  */
 const findHook = async (columnList, tableItem, keyColumnList) => {
   strimport.clear();
+  if (tableItem.tableType === 'VIEW') {
+    return undefined;
+  }
   return modelTemplate(tableItem, keyColumnList, columnList);
 };
 

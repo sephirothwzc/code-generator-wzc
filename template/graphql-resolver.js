@@ -33,7 +33,9 @@ const findForeignKey = (tableItem, keyColumnList, columnList) => {
     },`;
     } else {
       // 主表 主键 Hasmany 1 v N
-      return `    ${pascalName(p.TABLE_NAME, false)}${pascalName(p.COLUMN_NAME)}: async (_root, _args, ctx, _info) => {
+      return `    ${pascalName(p.TABLE_NAME, false)}${pascalName(
+        p.COLUMN_NAME
+      )}: async (_root, _args, ctx, _info) => {
       const service = await getService(ctx, '${pascalName(p.TABLE_NAME, false)}');
       _.set(_args, 'param.where.${pascalName(p.COLUMN_NAME, false)}', _root.id);
       return service.findAll(_args.param);
@@ -57,12 +59,12 @@ const modelTemplate = (tableItem, keyColumnList, columnList) => {
   foreignKey &&
     (foreignKey = `
 ${foreignKey}`);
+  const mutationString = tableItem.tableType !== 'VIEW' ? 'Mutation, ' : '';
   return `const resolverUtil = require('../utils/resolver.util');
-const { Query, Mutation, getService } = resolverUtil('${_.camelCase(tableItem.name)}');
+const { Query, ${mutationString} getService } = resolverUtil('${_.camelCase(tableItem.name)}');
 ${imputlodash}
 module.exports = {
-  Query,
-  Mutation,${foreignKey}
+  Query,${mutationString} ${foreignKey}
 };
 `;
 };

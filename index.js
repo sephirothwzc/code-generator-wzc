@@ -37,6 +37,7 @@ const findhook = require('./template/graphql-hook');
 
 const fs = require('fs');
 const { promisify } = require('util');
+const { exec } = require('child_process');
 
 const modelFunction = {
   findSequelizeModel,
@@ -149,11 +150,8 @@ const createFile = async (filename, txt, type) => {
   if (type === 'graphql' || type === 'resolver') {
     const codeName = type === 'graphql' ? 'schema.graphql' : 'resolver.js';
     shell.mkdir('-p', `${filePath}/${filename}`);
-    return new Promise((resolve, reject) => {
-      fs.writeFile(`${filePath}/${filename}/${codeName}`, txt, (error) => {
-        error ? reject(error) : resolve();
-      });
-    });
+
+    return fileWritePromise(`${filePath}/${filename}/${codeName}`, txt);
   }
   // 文件名后缀
   let suffix = type;
@@ -162,9 +160,13 @@ const createFile = async (filename, txt, type) => {
   }
   // const suffix = type !== 'SequelizeModel' ? type : 'model';
   shell.mkdir('-p', filePath);
+  return fileWritePromise(`${filePath}/${filename}.${suffix}.ts`, txt);
+};
+
+const fileWritePromise = (fullPath, txt) => {
   return new Promise((resolve, reject) => {
-    fs.writeFile(`${filePath}/${filename}.${suffix}.ts`, txt, (error) => {
-      error ? reject(error) : resolve();
+    fs.writeFile(fullPath, txt, (error) => {
+      error ? reject(error) : resolve(fullPath);
     });
   });
 };
@@ -173,8 +175,11 @@ const createFile = async (filename, txt, type) => {
  * 成功提示
  * @param {string} filepath 文件路径
  */
-const success = (filepath) => {
+const success = (filepath, fullPath) => {
   console.log(chalk.white.bgGreen.bold(`Done! File created`) + `\t [${filepath}]`);
+  // 格式化
+  exec(`npx prettier --write ${fullPath}`);
+  console.log(chalk.white.bgGreen.bold(`Done! File FullPath`) + `\t [${fullPath}]`);
 };
 
 /**
@@ -275,8 +280,7 @@ const run = async () => {
   const result = await askListQuestions(nameList, 'tableName', 'checkbox');
   // 选择导出对象
   const type = await askListQuestions(codeTypeArray, 'fileType', 'checkbox');
-  // // 输出目录 再说吧
-  // const dirpath = await
+  //
   result.tableName.forEach(async (p) => {
     const columnList = await mysqlHelper.queryColumn(p.name);
     const keyColumnList = await mysqlHelper.queryKeyColumn(p.name);
@@ -290,8 +294,8 @@ const run = async () => {
       }
       const filename = p.name.replace(/_/g, '-');
       createFile(filename, tempTxt, t)
-        .then(() => {
-          success(filename);
+        .then((fullPath) => {
+          success(filename, fullPath);
         })
         .catch((error) => {
           console.error(chalk.white.bgRed.bold(`Error: `) + `\t [${filename}]${error}!`);
