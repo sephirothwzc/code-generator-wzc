@@ -71,7 +71,7 @@ const findEnum = (columnRow) => {
   }
   const regex2 = /\[(.+?)\]/g; // [] 中括号
   const value = columnRow.COLUMN_COMMENT.match(regex2);
-  if (!value || value === `[unique]`) {
+  if (!value || value[0] === `[unique]`) {
     return undefined;
   }
 

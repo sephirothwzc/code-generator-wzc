@@ -95,14 +95,15 @@ const findEnum = (tableName, columnRow) => {
   if (columnRow.COLUMN_COMMENT) {
     const regex2 = /\[(.+?)\]/g; // [] 中括号
     value = columnRow.COLUMN_COMMENT.match(regex2);
-    if (value && value !== `[unique]`) {
+    if (value) {
       value = value[value.length - 1].replace('[', '').replace(']', '');
     }
   }
   if (columnRow.DATA_TYPE === 'enum' && !value) {
     value = columnRow.COLUMN_TYPE.replace('enum', '').replace(/[()']/g, '');
   }
-  if (!value) {
+  console.log(value);
+  if (!value || value === 'unique') {
     return undefined;
   }
   const ee = value
