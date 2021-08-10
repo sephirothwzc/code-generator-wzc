@@ -7,7 +7,15 @@
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
 
-const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'i18n'];
+const notColumn = [
+  'id',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+  'created_user',
+  'updated_user',
+  'i18n',
+];
 
 const gqlTypeMapper = {
   GraphQLJSON: {
@@ -63,7 +71,7 @@ const findEnum = (columnRow) => {
   }
   const regex2 = /\[(.+?)\]/g; // [] 中括号
   const value = columnRow.COLUMN_COMMENT.match(regex2);
-  if (!value) {
+  if (!value || value === `[unique]`) {
     return undefined;
   }
 
@@ -75,7 +83,9 @@ const findEnum = (columnRow) => {
 
 const findProperty = (typeString, enumTypeName, gqlType, columnRow) => {
   const nullable = columnRow.IS_NULLABLE === 'YES' ? ', nullable: true ' : '';
-  const gqlTypeTxt = enumTypeName ? `()=> ${enumTypeName}, ` : _.get(gqlTypeMapper, `${gqlType}.txt`, '');
+  const gqlTypeTxt = enumTypeName
+    ? `()=> ${enumTypeName}, `
+    : _.get(gqlTypeMapper, `${gqlType}.txt`, '');
   return `  /**
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */

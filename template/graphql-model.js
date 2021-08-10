@@ -7,7 +7,15 @@
 const _ = require('lodash');
 const pascalName = require('../utils/name-case');
 
-const notColumn = ['id', 'created_at', 'updated_at', 'deleted_at', 'created_user', 'updated_user', 'i18n'];
+const notColumn = [
+  'id',
+  'created_at',
+  'updated_at',
+  'deleted_at',
+  'created_user',
+  'updated_user',
+  'i18n',
+];
 
 const findTypeTxt = (columnRow) => {
   switch (columnRow.DATA_TYPE) {
@@ -58,7 +66,7 @@ const findEnum = (columnRow) => {
   }
   const regex2 = /\[(.+?)\]/g; // [] 中括号
   const value = columnRow.COLUMN_COMMENT.match(regex2);
-  if (!value) {
+  if (!value || value === `[unique]`) {
     return undefined;
   }
   const ee = value[value.length - 1]
@@ -106,7 +114,9 @@ const findProperty = (typeString, enumTypeName, sequelizeType, columnRow) => {
   return `  /**
    * ${columnRow.COLUMN_COMMENT || columnRow.COLUMN_NAME}
    */
-  @Field(${columnRow.DATA_TYPE === 'json' ? '()=> GraphQLJSON, ' : ''}{ description: '${columnRow.COLUMN_COMMENT}'${nullable} })
+  @Field(${columnRow.DATA_TYPE === 'json' ? '()=> GraphQLJSON, ' : ''}{ description: '${
+    columnRow.COLUMN_COMMENT
+  }'${nullable} })
   ${pascalName(columnRow.COLUMN_NAME, false)}?: ${enumTypeName || typeString};
 `;
 };

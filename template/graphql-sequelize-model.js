@@ -95,7 +95,7 @@ const findEnum = (tableName, columnRow) => {
   if (columnRow.COLUMN_COMMENT) {
     const regex2 = /\[(.+?)\]/g; // [] 中括号
     value = columnRow.COLUMN_COMMENT.match(regex2);
-    if (value) {
+    if (value && value !== `[unique]`) {
       value = value[value.length - 1].replace('[', '').replace(']', '');
     }
   }
